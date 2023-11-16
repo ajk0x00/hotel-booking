@@ -50,7 +50,7 @@ public class ApplicationConfig {
             userRepo.save(new User(
                     "Hotel Booking Admin",
                     "admin@admin.com",
-                    "admin",
+                    passwordEncoder().encode("admin"),
                     Authority.ADMIN
             ));
     }
