@@ -27,4 +27,8 @@ public class Hotel {
     @Embedded
     @NotNull
     GeoLocation location;
+
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    User user;
 }

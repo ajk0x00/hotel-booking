@@ -11,6 +11,10 @@ public class Logger {
         logger = java.util.logging.Logger.getLogger(parent.getClass().getName());
     }
 
+    public Logger(String parent) {
+        logger = java.util.logging.Logger.getLogger(parent);
+    }
+
     public void logException(Exception exception) {
         logException(Level.SEVERE, exception);
     }

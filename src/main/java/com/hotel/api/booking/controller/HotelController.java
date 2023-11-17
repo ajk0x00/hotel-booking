@@ -1,8 +1,15 @@
 package com.hotel.api.booking.controller;
 
 import com.hotel.api.booking.dto.EntityCreatedDTO;
+import com.hotel.api.booking.dto.HotelCreateDTO;
+import com.hotel.api.booking.dto.HotelDTO;
+import com.hotel.api.booking.dto.UserDTO;
+import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.Hotel;
+import com.hotel.api.booking.model.User;
 import com.hotel.api.booking.repository.HotelRepository;
+import com.hotel.api.booking.service.AuthenticationService;
+import com.hotel.api.booking.util.GeneralUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +25,20 @@ import java.util.List;
 public class HotelController {
 
     private final HotelRepository hotelRepo;
+    private final AuthenticationService authService;
 
     @GetMapping("/")
-    public List<Hotel> listAllHotels() {
-        return hotelRepo.findAll();
+    public List<HotelDTO> listAllHotels() {
+        return hotelRepo.findAll()
+                .stream()
+                .map(hotel -> new HotelDTO(hotel.getName(), hotel.getRoomCount(), hotel.getLocation()))
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public Hotel getHotelDetails(@PathVariable Long id) {
-        return hotelRepo.findById(id).orElseThrow();
+    public HotelDTO getHotelDetails(@PathVariable Long id) {
+        Hotel hotel = hotelRepo.findById(id).orElseThrow();
+        return new HotelDTO(hotel.getName(), hotel.getRoomCount(), hotel.getLocation());
         // TODO: throw a valid Exception
     }
 
@@ -34,7 +46,12 @@ public class HotelController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityCreatedDTO createHotel(@Valid @RequestBody Hotel hotel) {
+    public EntityCreatedDTO createHotel(@Valid @RequestBody HotelCreateDTO hotelCreate) {
+        UserDTO userDTO = hotelCreate.user();
+        User user = authService.signup(userDTO, Authority.HOTEL);
+        Hotel hotel = new Hotel();
+        GeneralUtils.map(hotelCreate, hotel);
+        hotel.setUser(user);
         hotelRepo.save(hotel);
         return new EntityCreatedDTO(hotel.getId(), "Hotel created successfully");
     }
@@ -43,12 +60,10 @@ public class HotelController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EntityCreatedDTO updateHotel(@Valid @RequestBody Hotel sourceHotel, @PathVariable Long id) {
+    public EntityCreatedDTO updateHotel(@Valid @RequestBody HotelDTO sourceHotel, @PathVariable Long id) {
         Hotel targetHotel = hotelRepo.findById(id).orElseThrow();
         // TODO: throw a valid variable
-        targetHotel.setName(sourceHotel.getName());
-        targetHotel.setRoomCount(sourceHotel.getRoomCount());
-        targetHotel.setLocation(sourceHotel.getLocation());
+        GeneralUtils.map(sourceHotel, targetHotel);
         hotelRepo.save(targetHotel);
         return new EntityCreatedDTO(targetHotel.getId(), "Hotel updated successfully");
     }

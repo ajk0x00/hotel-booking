@@ -45,7 +45,6 @@ public class JwtService {
 
     public static String generateToken(UserDetails details, Map<String, Object> otherClaims) {
         long TWO_DAYS = 2 * 24 * 60 * 60 * 1000L;
-        System.out.println(details);
         return Jwts
                 .builder()
                 .setClaims(otherClaims)

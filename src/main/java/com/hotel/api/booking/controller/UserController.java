@@ -2,9 +2,11 @@ package com.hotel.api.booking.controller;
 
 import com.hotel.api.booking.dto.AuthenticationRequestDTO;
 import com.hotel.api.booking.dto.AuthenticationResponseDTO;
-import com.hotel.api.booking.dto.SignupRequestDTO;
+import com.hotel.api.booking.dto.UserDTO;
 import com.hotel.api.booking.model.Authority;
+import com.hotel.api.booking.model.User;
 import com.hotel.api.booking.service.AuthenticationService;
+import com.hotel.api.booking.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,11 +22,15 @@ public class UserController {
 
     @GetMapping("/login")
     public AuthenticationResponseDTO login(@RequestBody AuthenticationRequestDTO requestDTO) {
-        return authService.login(requestDTO);
+        User user = authService.login(requestDTO);
+        String token = JwtService.generateToken(user);
+        return new AuthenticationResponseDTO(token);
     }
 
     @GetMapping("/sign-up")
-    public AuthenticationResponseDTO signup(@RequestBody SignupRequestDTO requestDTO) {
-        return authService.signup(requestDTO, Authority.USER);
+    public AuthenticationResponseDTO signup(@RequestBody UserDTO requestDTO) {
+        User user = authService.signup(requestDTO, Authority.USER);
+        String token = JwtService.generateToken(user);
+        return new AuthenticationResponseDTO(token);
     }
 }
