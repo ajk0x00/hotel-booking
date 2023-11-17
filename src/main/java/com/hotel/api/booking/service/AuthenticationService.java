@@ -1,8 +1,7 @@
 package com.hotel.api.booking.service;
 
 import com.hotel.api.booking.dto.AuthenticationRequestDTO;
-import com.hotel.api.booking.dto.AuthenticationResponseDTO;
-import com.hotel.api.booking.dto.SignupRequestDTO;
+import com.hotel.api.booking.dto.UserDTO;
 import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.User;
 import com.hotel.api.booking.repository.UserRepository;
@@ -22,7 +21,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public AuthenticationResponseDTO signup(SignupRequestDTO requestDTO, Authority authority) {
+    public User signup(UserDTO requestDTO, Authority authority) {
         String name = requestDTO.name();
         String email = requestDTO.email();
         String password = passwordEncoder.encode(requestDTO.password());
@@ -31,21 +30,17 @@ public class AuthenticationService {
                 name,
                 email,
                 password,
-                Authority.USER
+                authority
         );
         userRepo.save(user);
-        String token = JwtService.generateToken(user);
-        return new AuthenticationResponseDTO(token);
+        return user;
     }
 
-    public AuthenticationResponseDTO login(AuthenticationRequestDTO requestDTO) {
+    public User login(AuthenticationRequestDTO requestDTO) {
         String username = requestDTO.email();
         String password = requestDTO.password();
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        User user = userRepo.findByEmail(username).orElseThrow(); // TODO: throw a valid Exception
-        String token = JwtService.generateToken(user);
-
-        return new AuthenticationResponseDTO(token);
+        return userRepo.findByEmail(username).orElseThrow();
     }
 }
