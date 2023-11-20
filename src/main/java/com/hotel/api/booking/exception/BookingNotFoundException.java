@@ -3,6 +3,6 @@ package com.hotel.api.booking.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.FORBIDDEN)
-public class RoomUnavailableException extends RuntimeException {
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class BookingNotFoundException extends RuntimeException {
 }

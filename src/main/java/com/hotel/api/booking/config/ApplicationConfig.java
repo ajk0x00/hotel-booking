@@ -1,5 +1,6 @@
 package com.hotel.api.booking.config;
 
+import com.hotel.api.booking.exception.UserNotFoundException;
 import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.User;
 import com.hotel.api.booking.repository.UserRepository;
@@ -14,16 +15,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.function.Supplier;
+
 @RequiredArgsConstructor
 @Configuration
 public class ApplicationConfig {
 
     private final UserRepository userRepo;
+    private final Supplier<UserNotFoundException> userNotFoundException = UserNotFoundException::new;
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepo.findByEmail(username).orElseThrow();
-        // TODO: throw a valid Exception
+        return username -> userRepo.findByEmail(username).orElseThrow(userNotFoundException);
     }
 
     @Bean
