@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,7 +35,10 @@ public class Room {
     @Enumerated(EnumType.STRING)
     RoomStatus status;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id")
     Hotel hotel;
+
+    @OneToMany(mappedBy = "room")
+    Set<Booking> booking = new HashSet<>();
 }

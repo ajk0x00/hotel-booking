@@ -1,6 +1,5 @@
 package com.hotel.api.booking.model;
 
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,36 +7,45 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.sql.Date;
+
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Entity
-public class Hotel {
+public class Booking {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
     @NotNull
     @NotBlank
-    String name;
+    String guestName;
 
     @NotNull
-    int roomCount;
-
     @Embedded
-    @NotNull
-    GeoLocation location;
+    ContactInfo contactInfo;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "hotel_id")
+    Hotel hotel;
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "room_id")
+    Room room;
+
+    @NotNull
+    @ManyToOne
     @JoinColumn(name = "user_id")
     User user;
 
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.PERSIST)
-    Set<Room> rooms = new HashSet<>();
+    @NotNull
+    Date checkIn;
 
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.PERSIST)
-    Set<Booking> bookings = new HashSet<>();
+    @NotNull
+    Date checkOut;
 }
