@@ -2,8 +2,7 @@ package com.hotel.api.booking.controller;
 
 import com.hotel.api.booking.dto.BookingDTO;
 import com.hotel.api.booking.dto.EntityCreatedDTO;
-import com.hotel.api.booking.exception.RoomAlreadyBookedException;
-import com.hotel.api.booking.exception.RoomUnavailableException;
+import com.hotel.api.booking.exception.*;
 import com.hotel.api.booking.model.*;
 import com.hotel.api.booking.repository.BookingRepository;
 import com.hotel.api.booking.repository.HotelRepository;
@@ -18,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 @RequiredArgsConstructor
 @RestController
@@ -27,6 +27,9 @@ public class BookingController {
     private final BookingRepository bookingRepo;
     private final RoomRepository roomRepo;
     private final HotelRepository hotelRepo;
+    private final Supplier<RoomNotFoundException> roomNotFoundException = RoomNotFoundException::new;
+    private final Supplier<HotelNotFoundException> hotelNotFoundException = HotelNotFoundException::new;
+    private final Supplier<BookingNotFoundException> bookingNotFoundException = BookingNotFoundException::new;
 
     @GetMapping("/")
     List<BookingDTO> listAllBooking(@PathVariable Long hotelId, @PathVariable Long roomId) {
@@ -50,7 +53,7 @@ public class BookingController {
         User currentUser = (User) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
         return bookingRepo.findUserBookingByRoomAndHotelId(bookingId, hotelId,
-                roomId, currentUser.getId()).orElseThrow();
+                roomId, currentUser.getId()).orElseThrow(bookingNotFoundException);
     }
 
     @Transactional
@@ -59,10 +62,9 @@ public class BookingController {
     EntityCreatedDTO createBooking(@Valid @RequestBody BookingDTO bookingDTO,
                                    @PathVariable Long hotelId,
                                    @PathVariable Long roomId) {
-        Room room = roomRepo.findByRoomIdAndHotelId(roomId, hotelId).orElseThrow();
+        Room room = roomRepo.findByRoomIdAndHotelId(roomId, hotelId).orElseThrow(roomNotFoundException);
         boolean isRoomUnAvailable = room.getStatus() == RoomStatus.UNAVAILABLE;
         boolean isRoomAlreadyBooked = bookingRepo.isRoomAlreadyBooked(roomId, bookingDTO.checkIn(), bookingDTO.checkOut());
-        // TODO: throw a valid exception
         if (isRoomUnAvailable)
             throw new RoomUnavailableException();
         if (isRoomAlreadyBooked)
@@ -70,8 +72,7 @@ public class BookingController {
 
         User currentUser = (User) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
-        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow();
-        // TODO: throw a valid exception
+        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(hotelNotFoundException);
         Booking booking = new Booking();
         GeneralUtils.map(bookingDTO, booking, false);
         booking.setHotel(hotel);
@@ -89,8 +90,7 @@ public class BookingController {
                                    @PathVariable Long hotelId,
                                    @PathVariable Long roomId) {
         // TODO: check if the booking belongs to the user
-        Booking booking = bookingRepo.findById(bookingId).orElseThrow();
-        // TODO: throw a valid Exception
+        Booking booking = bookingRepo.findById(bookingId).orElseThrow(bookingNotFoundException);
         Room room = booking.getRoom();
         boolean isRoomUnAvailable = room.getStatus() == RoomStatus.UNAVAILABLE;
         boolean isRoomAlreadyBooked = bookingRepo.countBookingOnDate(roomId, bookingDTO.checkIn(), bookingDTO.checkOut()) > 1;
@@ -110,8 +110,7 @@ public class BookingController {
     @ResponseStatus(HttpStatus.OK)
     public EntityCreatedDTO cancelBooking(@PathVariable Long bookingId) {
         // TODO: check if the booking belongs to the user
-        Booking booking = bookingRepo.findById(bookingId).orElseThrow();
-        // TODO: throw a valid Exception
+        Booking booking = bookingRepo.findById(bookingId).orElseThrow(bookingNotFoundException);
         return new EntityCreatedDTO(booking.getId(), "Booking cancelled successfully");
     }
 }
