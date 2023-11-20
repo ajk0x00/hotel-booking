@@ -1,4 +1,9 @@
 package com.hotel.api.booking.dto;
 
-public record AuthenticationRequestDTO(String email, String password) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public record AuthenticationRequestDTO(
+        @NotNull @NotBlank String email,
+        @NotNull @NotBlank String password) {
 }
