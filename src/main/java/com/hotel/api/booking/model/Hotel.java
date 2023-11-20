@@ -8,6 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -31,4 +34,7 @@ public class Hotel {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     User user;
+
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.PERSIST)
+    Set<Room> rooms = new HashSet<>();
 }
