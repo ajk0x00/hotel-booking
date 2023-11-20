@@ -11,7 +11,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -38,6 +40,9 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @NotNull
     private Authority authority;
+
+    @OneToMany(mappedBy = "user")
+    Set<Booking> bookings = new HashSet<>();
 
     public User(String name, String email, String password, Authority authority) {
         this.name = name;
