@@ -1,10 +1,12 @@
 package com.hotel.api.booking.controller;
 
 import com.hotel.api.booking.dto.EntityCreatedDTO;
+import com.hotel.api.booking.dto.RoomDTO;
 import com.hotel.api.booking.model.Hotel;
 import com.hotel.api.booking.model.Room;
 import com.hotel.api.booking.repository.HotelRepository;
 import com.hotel.api.booking.repository.RoomRepository;
+import com.hotel.api.booking.util.GeneralUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,22 +25,32 @@ public class RoomController {
     private final HotelRepository hotelRepo;
 
     @GetMapping("/")
-    public List<Room> listRoom(@PathVariable Long hotelId) {
-        return roomRepo.findAllByHotelId(hotelId);
+    public List<RoomDTO> listRoom(@PathVariable Long hotelId) {
+        return roomRepo.findAllByHotelId(hotelId)
+                .stream().map(room ->
+                        new RoomDTO(room.getId(), room.getRoomNumber(),
+                                room.getType(), room.getPrice(), room.getStatus()))
+                .toList();
     }
 
     @GetMapping("/{roomId}")
-    public Room getRoomDetails(@PathVariable Long hotelId, @PathVariable Long roomId) {
-        return roomRepo.findByRoomIdAndHotelId(hotelId, roomId).orElseThrow();
+    public RoomDTO getRoomDetails(@PathVariable Long hotelId,
+                                  @PathVariable Long roomId) {
+        Room room = roomRepo.findByRoomIdAndHotelId(hotelId, roomId).orElseThrow();
+        return new RoomDTO(room.getId(), room.getRoomNumber(),
+                room.getType(), room.getPrice(), room.getStatus());
         // TODO: throw a valid Exception
     }
 
     @Transactional
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
     @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityCreatedDTO createRoom(@Valid @RequestBody Room room, @PathVariable Long hotelId) {
-        System.out.println(room);
+    public EntityCreatedDTO createRoom(@Valid @RequestBody RoomDTO roomDTO,
+                                       @PathVariable Long hotelId) {
+        // TODO: validate if the hotel id belongs to the authenticated user
+        Room room = new Room();
+        GeneralUtils.map(roomDTO, room, false);
         Hotel hotel = hotelRepo.findById(hotelId).orElseThrow();
         // TODO: throw a valid Exception
         room.setHotel(hotel);
@@ -47,31 +59,34 @@ public class RoomController {
     }
 
     @Transactional
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
     @PutMapping("/{roomId}")
     @ResponseStatus(HttpStatus.OK)
-    public EntityCreatedDTO updateRoom(@Valid @RequestBody Room sourceRoom,
+    public EntityCreatedDTO updateRoom(@Valid @RequestBody RoomDTO sourceRoomDTO,
                                        @PathVariable Long hotelId,
                                        @PathVariable Long roomId) {
+        // TODO: validate if the hotel id belongs to the authenticated user
         Room targetRoom = roomRepo.findByRoomIdAndHotelId(hotelId, roomId).orElseThrow();
         Hotel hotel = hotelRepo.findById(hotelId).orElseThrow();
+        if (hotel.getRooms().contains(targetRoom))
+            throw new RuntimeException("Room doesn't belong to hotel");
         // TODO: throw a valid Exception
-        targetRoom.setRoomNumber(sourceRoom.getRoomNumber());
-        targetRoom.setType(sourceRoom.getType());
-        targetRoom.setPrice(sourceRoom.getPrice());
-        targetRoom.setStatus(sourceRoom.getStatus());
-        targetRoom.setHotel(hotel);
+        GeneralUtils.map(sourceRoomDTO, targetRoom, false);
         roomRepo.save(targetRoom);
         return new EntityCreatedDTO(targetRoom.getId(), "Room updated successfully");
     }
 
     @Transactional
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
     @DeleteMapping("/{roomId}")
     @ResponseStatus(HttpStatus.OK)
     public EntityCreatedDTO deleteRoom(@PathVariable Long hotelId,
                                        @PathVariable Long roomId) {
+        // TODO: validate if the hotel id belongs to the authenticated user
         Room targetRoom = roomRepo.findByRoomIdAndHotelId(hotelId, roomId).orElseThrow();
+        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow();
+        if (hotel.getRooms().contains(targetRoom))
+            throw new RuntimeException("Room doesn't belong to hotel");
         // TODO: throw a valid Exception
         roomRepo.delete(targetRoom);
         return new EntityCreatedDTO(targetRoom.getId(), "Room deleted successfully");

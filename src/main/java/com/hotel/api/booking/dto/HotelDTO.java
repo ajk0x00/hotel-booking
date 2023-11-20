@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record HotelDTO(
+        Long id,
         @NotNull @NotBlank String name,
         @NotNull int roomCount,
         @NotNull GeoLocation location) {

@@ -17,6 +17,7 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
+    // TODO: Add a composite unique key with hotel
     @NotNull
     int roomNumber;
 
