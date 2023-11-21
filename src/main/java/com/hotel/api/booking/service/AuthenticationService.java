@@ -2,12 +2,15 @@ package com.hotel.api.booking.service;
 
 import com.hotel.api.booking.dto.AuthenticationRequestDTO;
 import com.hotel.api.booking.dto.UserDTO;
+import com.hotel.api.booking.exception.UserAlreadyExistException;
 import com.hotel.api.booking.exception.UserNotFoundException;
 import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.User;
 import com.hotel.api.booking.repository.UserRepository;
+import com.hotel.api.booking.util.Logger;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +26,7 @@ public class AuthenticationService {
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
     private final Supplier<UserNotFoundException> userNotFoundException = UserNotFoundException::new;
+    private final Logger logger = new Logger(this);
 
     @Transactional
     public User signup(UserDTO requestDTO, Authority authority) {
@@ -36,7 +40,13 @@ public class AuthenticationService {
                 password,
                 authority
         );
-        userRepo.save(user);
+        try {
+            userRepo.save(user);
+            userRepo.flush();
+        } catch (DataIntegrityViolationException exception) {
+            logger.logException(exception);
+            throw new UserAlreadyExistException();
+        }
         return user;
     }
 
