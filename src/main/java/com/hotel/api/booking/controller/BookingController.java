@@ -1,6 +1,7 @@
 package com.hotel.api.booking.controller;
 
 import com.hotel.api.booking.dto.BookingDTO;
+import com.hotel.api.booking.dto.BookingRequestDTO;
 import com.hotel.api.booking.dto.EntityCreatedDTO;
 import com.hotel.api.booking.exception.*;
 import com.hotel.api.booking.model.*;
@@ -59,7 +60,7 @@ public class BookingController {
     @Transactional
     @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
-    EntityCreatedDTO createBooking(@Valid @RequestBody BookingDTO bookingDTO,
+    EntityCreatedDTO createBooking(@Valid @RequestBody BookingRequestDTO bookingDTO,
                                    @PathVariable Long hotelId,
                                    @PathVariable Long roomId) {
         Room room = roomRepo.findByRoomIdAndHotelId(roomId, hotelId).orElseThrow(roomNotFoundException);
@@ -85,7 +86,7 @@ public class BookingController {
     @Transactional
     @PutMapping("/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
-    EntityCreatedDTO updateBooking(@Valid @RequestBody BookingDTO bookingDTO,
+    EntityCreatedDTO updateBooking(@Valid @RequestBody BookingRequestDTO bookingDTO,
                                    @PathVariable Long bookingId,
                                    @PathVariable Long hotelId,
                                    @PathVariable Long roomId) {

@@ -2,6 +2,7 @@ package com.hotel.api.booking.controller;
 
 import com.hotel.api.booking.dto.EntityCreatedDTO;
 import com.hotel.api.booking.dto.RoomDTO;
+import com.hotel.api.booking.dto.RoomRequestDTO;
 import com.hotel.api.booking.exception.HotelNotFoundException;
 import com.hotel.api.booking.exception.RoomNotFoundException;
 import com.hotel.api.booking.exception.RoomNotFoundInHotelException;
@@ -10,6 +11,7 @@ import com.hotel.api.booking.model.Room;
 import com.hotel.api.booking.repository.HotelRepository;
 import com.hotel.api.booking.repository.RoomRepository;
 import com.hotel.api.booking.util.GeneralUtils;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class RoomController {
     private final Supplier<HotelNotFoundException> hotelNotFoundException = HotelNotFoundException::new;
 
 
+    @Operation(summary = "List all rooms in a specific hotel")
     @GetMapping("/")
     public List<RoomDTO> listRoom(@PathVariable Long hotelId) {
         return roomRepo.findAllByHotelId(hotelId)
@@ -41,6 +44,8 @@ public class RoomController {
                 .toList();
     }
 
+
+    @Operation(summary = "Get information about a specific Room")
     @GetMapping("/{roomId}")
     public RoomDTO getRoomDetails(@PathVariable Long hotelId,
                                   @PathVariable Long roomId) {
@@ -49,11 +54,13 @@ public class RoomController {
                 room.getType(), room.getPrice(), room.getStatus());
     }
 
+
+    @Operation(summary = "Create a new Room inside a specific hotel")
     @Transactional
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
     @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityCreatedDTO createRoom(@Valid @RequestBody RoomDTO roomDTO,
+    public EntityCreatedDTO createRoom(@Valid @RequestBody RoomRequestDTO roomDTO,
                                        @PathVariable Long hotelId) {
         // TODO: validate if the hotel id belongs to the authenticated user
         Room room = new Room();
@@ -64,11 +71,13 @@ public class RoomController {
         return new EntityCreatedDTO(room.getId(), "Room created successfully");
     }
 
+
+    @Operation(summary = "Update details about a specific room")
     @Transactional
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
     @PutMapping("/{roomId}")
     @ResponseStatus(HttpStatus.OK)
-    public EntityCreatedDTO updateRoom(@Valid @RequestBody RoomDTO sourceRoomDTO,
+    public EntityCreatedDTO updateRoom(@Valid @RequestBody RoomRequestDTO sourceRoomDTO,
                                        @PathVariable Long hotelId,
                                        @PathVariable Long roomId) {
         // TODO: validate if the hotel id belongs to the authenticated user
@@ -81,6 +90,8 @@ public class RoomController {
         return new EntityCreatedDTO(targetRoom.getId(), "Room updated successfully");
     }
 
+
+    @Operation(summary = "Delete a room")
     @Transactional
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
     @DeleteMapping("/{roomId}")
