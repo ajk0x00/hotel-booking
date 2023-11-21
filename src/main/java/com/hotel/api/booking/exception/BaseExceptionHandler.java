@@ -6,6 +6,7 @@ import com.hotel.api.booking.util.Logger;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -47,5 +48,12 @@ public class BaseExceptionHandler {
     public ErrorDTO handleBadRequests(DataIntegrityViolationException e) {
         logger.logException(e);
         return new ErrorDTO(1002, "Bad request format");
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ErrorDTO handleBadRequests(HttpRequestMethodNotSupportedException e) {
+        logger.logException(e);
+        return new ErrorDTO(1002, "Bad request");
     }
 }
