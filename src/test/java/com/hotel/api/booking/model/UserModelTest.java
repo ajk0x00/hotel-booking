@@ -23,7 +23,7 @@ public class UserModelTest {
 
     @Test
     void shouldBeAbleToSaveValidUserData() {
-        User validUser = new User("test121", "test@admin.com", "test123567545", Authority.USER);
+        User validUser = new User("test121", "ajk" + Math.random() + "@admin.com", "test123567545", Authority.USER);
 
         userRepo.save(validUser);
         Executable executable = () -> userRepo.flush();
