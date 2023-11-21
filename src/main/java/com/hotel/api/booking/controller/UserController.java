@@ -7,6 +7,7 @@ import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.User;
 import com.hotel.api.booking.service.AuthenticationService;
 import com.hotel.api.booking.service.JwtService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,7 @@ public class UserController {
 
     private final AuthenticationService authService;
 
+    @Operation(summary = "Authenticate a user")
     @PostMapping("/login")
     public AuthenticationResponseDTO login(@Valid @RequestBody AuthenticationRequestDTO requestDTO) {
         User user = authService.login(requestDTO);
@@ -28,6 +30,7 @@ public class UserController {
         return new AuthenticationResponseDTO(token);
     }
 
+    @Operation(summary = "Create a new user")
     @PostMapping("/sign-up")
     public AuthenticationResponseDTO signup(@Valid @RequestBody UserDTO requestDTO) {
         User user = authService.signup(requestDTO, Authority.USER);
