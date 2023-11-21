@@ -3,7 +3,9 @@ package com.hotel.api.booking.exception;
 import com.hotel.api.booking.dto.ErrorDTO;
 import com.hotel.api.booking.dto.ValidationErrorDTO;
 import com.hotel.api.booking.util.Logger;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -31,5 +33,19 @@ public class BaseExceptionHandler {
     public ErrorDTO handleAllUncaughtExceptions(Exception e) {
         logger.logException(e);
         return new ErrorDTO(1000, "Something went wrong :(");
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ErrorDTO handleBadRequests(HttpMessageNotReadableException e) {
+        logger.logException(e);
+        return new ErrorDTO(1001, "Bad request format");
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ErrorDTO handleBadRequests(DataIntegrityViolationException e) {
+        logger.logException(e);
+        return new ErrorDTO(1002, "Bad request format");
     }
 }
