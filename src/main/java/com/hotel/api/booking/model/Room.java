@@ -35,6 +35,7 @@ public class Room {
     @Enumerated(EnumType.STRING)
     RoomStatus status;
 
+    @NotNull
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id")
     Hotel hotel;
