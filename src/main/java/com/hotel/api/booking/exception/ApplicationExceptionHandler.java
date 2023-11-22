@@ -12,8 +12,8 @@ public class ApplicationExceptionHandler {
 
     private final Logger logger = new Logger(this);
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(HotelNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorDTO handleHotelNotFound(HotelNotFoundException exception) {
         logger.logException(exception);
         return new ErrorDTO(1200, "Hotel not found");
@@ -52,5 +52,12 @@ public class ApplicationExceptionHandler {
     public ErrorDTO handleUserNotFound(UserNotFoundException exception) {
         logger.logException(exception);
         return new ErrorDTO(1205, "User not found");
+    }
+
+    @ExceptionHandler(BookingNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorDTO handleBookingNotFound(BookingNotFoundException exception) {
+        logger.logException(exception);
+        return new ErrorDTO(301, "Unable to find booking");
     }
 }
