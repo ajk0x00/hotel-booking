@@ -8,6 +8,7 @@ import com.hotel.api.booking.exception.RoomNotFoundException;
 import com.hotel.api.booking.exception.RoomNotFoundInHotelException;
 import com.hotel.api.booking.model.Hotel;
 import com.hotel.api.booking.model.Room;
+import com.hotel.api.booking.repository.BookingRepository;
 import com.hotel.api.booking.repository.HotelRepository;
 import com.hotel.api.booking.repository.RoomRepository;
 import com.hotel.api.booking.util.GeneralUtils;
@@ -29,6 +30,7 @@ public class RoomController {
 
     private final RoomRepository roomRepo;
     private final HotelRepository hotelRepo;
+    private final BookingRepository bookingRepo;
 
     private final Supplier<RoomNotFoundException> roomNotFoundException = RoomNotFoundException::new;
     private final Supplier<HotelNotFoundException> hotelNotFoundException = HotelNotFoundException::new;
@@ -103,6 +105,7 @@ public class RoomController {
         Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(hotelNotFoundException);
         if (hotel.getRooms().contains(targetRoom))
             throw new RoomNotFoundInHotelException();
+        bookingRepo.deleteByRoomId(roomId);
         roomRepo.delete(targetRoom);
         return new EntityCreatedDTO(targetRoom.getId(), "Room deleted successfully");
     }

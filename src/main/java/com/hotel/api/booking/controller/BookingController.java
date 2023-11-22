@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/hotels/{hotelId}/rooms/{roomId}/bookings")
+@RequestMapping("/api/v1/hotels/{hotelId}/")
 public class BookingController {
 
     private final BookingRepository bookingRepo;
@@ -32,7 +32,19 @@ public class BookingController {
     private final Supplier<HotelNotFoundException> hotelNotFoundException = HotelNotFoundException::new;
     private final Supplier<BookingNotFoundException> bookingNotFoundException = BookingNotFoundException::new;
 
-    @GetMapping("/")
+    @Transactional
+    @GetMapping("/bookings")
+    public List<BookingDTO> listAllBookingsOfSpecificHotel(@PathVariable Long hotelId) {
+        return bookingRepo.findAllByHotelId(hotelId)
+                .stream().map(booking ->
+                        new BookingDTO(
+                                booking.getId(), booking.getRoom().getId(),
+                                booking.getGuestName(), booking.getContactInfo(),
+                                booking.getCheckIn(), booking.getCheckOut()))
+                .toList();
+    }
+
+    @GetMapping("rooms/{roomId}/bookings")
     List<BookingDTO> listAllBooking(@PathVariable Long hotelId, @PathVariable Long roomId) {
         User currentUser = (User) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
@@ -40,6 +52,7 @@ public class BookingController {
                 .stream()
                 .map(booking -> new BookingDTO(
                         booking.getId(),
+                        booking.getRoom().getId(),
                         booking.getGuestName(),
                         booking.getContactInfo(),
                         booking.getCheckIn(),
@@ -47,23 +60,27 @@ public class BookingController {
                 )).toList();
     }
 
-    @GetMapping("/{bookingId}")
+    @GetMapping("rooms/{roomId}/bookings/{bookingId}")
     BookingDTO getBookingDetails(@PathVariable Long hotelId,
                                  @PathVariable Long roomId,
                                  @PathVariable Long bookingId) {
         User currentUser = (User) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
-        return bookingRepo.findUserBookingByRoomAndHotelId(bookingId, hotelId,
+        Booking booking = bookingRepo.findUserBookingByRoomAndHotelId(bookingId, hotelId,
                 roomId, currentUser.getId()).orElseThrow(bookingNotFoundException);
+        return new BookingDTO(
+                booking.getId(), booking.getRoom().getId(),
+                booking.getGuestName(), booking.getContactInfo(),
+                booking.getCheckIn(), booking.getCheckOut());
     }
 
     @Transactional
-    @PostMapping("/")
+    @PostMapping("rooms/{roomId}/bookings")
     @ResponseStatus(HttpStatus.CREATED)
     EntityCreatedDTO createBooking(@Valid @RequestBody BookingRequestDTO bookingDTO,
                                    @PathVariable Long hotelId,
                                    @PathVariable Long roomId) {
-        Room room = roomRepo.findByRoomIdAndHotelId(roomId, hotelId).orElseThrow(roomNotFoundException);
+        Room room = roomRepo.findByRoomIdAndHotelId(hotelId, roomId).orElseThrow(roomNotFoundException);
         boolean isRoomUnAvailable = room.getStatus() == RoomStatus.UNAVAILABLE;
         boolean isRoomAlreadyBooked = bookingRepo.isRoomAlreadyBooked(roomId, bookingDTO.checkIn(), bookingDTO.checkOut());
         if (isRoomUnAvailable)
@@ -84,7 +101,7 @@ public class BookingController {
     }
 
     @Transactional
-    @PutMapping("/{bookingId}")
+    @PutMapping("rooms/{roomId}/bookings/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
     EntityCreatedDTO updateBooking(@Valid @RequestBody BookingRequestDTO bookingDTO,
                                    @PathVariable Long bookingId,
@@ -94,7 +111,7 @@ public class BookingController {
         Booking booking = bookingRepo.findById(bookingId).orElseThrow(bookingNotFoundException);
         Room room = booking.getRoom();
         boolean isRoomUnAvailable = room.getStatus() == RoomStatus.UNAVAILABLE;
-        boolean isRoomAlreadyBooked = bookingRepo.countBookingOnDate(roomId, bookingDTO.checkIn(), bookingDTO.checkOut()) > 1;
+        boolean isRoomAlreadyBooked = bookingRepo.isRoomAlreadyBooked(roomId, bookingId, bookingDTO.checkIn(), bookingDTO.checkOut());
         if (isRoomUnAvailable)
             throw new RoomUnavailableException();
         if (isRoomAlreadyBooked)
