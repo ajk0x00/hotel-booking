@@ -10,26 +10,27 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-@ResponseStatus(HttpStatus.UNAUTHORIZED)
 public class AuthenticationExceptionHandler {
     Logger logger = new Logger(this);
 
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(UserAlreadyExistException.class)
     public ErrorDTO handleUserAlreadyExist(UserAlreadyExistException exception) {
         logger.logException(exception);
         return new ErrorDTO(1101, "User already exist");
     }
 
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(JwtException.class)
     public ErrorDTO handleBadJwt(JwtException exception) {
         logger.logException(exception);
-        return new ErrorDTO(1100, "Invalid token");
+        return new ErrorDTO(1102, "Invalid token");
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(AccessDeniedException.class)
     public ErrorDTO handleAccessDenied(AccessDeniedException exception) {
         logger.logException(exception);
-        return new ErrorDTO(1002, "User is unauthorized to access the resource");
+        return new ErrorDTO(1103, "User is unauthorized to access the resource");
     }
 }
