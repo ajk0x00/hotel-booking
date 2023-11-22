@@ -9,6 +9,7 @@ import java.sql.Date;
 
 public record BookingDTO(
         Long id,
+        Long roomId,
         @NotNull @NotBlank String guestName,
         @NotNull @Valid ContactInfo contactInfo,
         @NotNull Date checkIn,

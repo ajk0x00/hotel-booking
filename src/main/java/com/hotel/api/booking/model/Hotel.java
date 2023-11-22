@@ -32,7 +32,7 @@ public class Hotel {
     GeoLocation location;
 
     @NotNull
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     User user;
 

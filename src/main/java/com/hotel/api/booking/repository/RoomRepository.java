@@ -12,9 +12,10 @@ import java.util.Optional;
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
 
+    @Query("select room from Room room join room.hotel hotel where hotel.id = :hotelId")
     List<Room> findAllByHotelId(Long hotelId);
 
-    @Query("select room from Room room where room.id = :roomId and room.hotel.id = :hotelId")
+    @Query("select room from Room room join room.hotel hotel where hotel.id = :hotelId and room.id = :roomId")
     Optional<Room> findByRoomIdAndHotelId(Long hotelId, Long roomId);
 
     @Modifying

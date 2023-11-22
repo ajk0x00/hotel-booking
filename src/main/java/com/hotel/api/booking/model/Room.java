@@ -36,7 +36,7 @@ public class Room {
     RoomStatus status;
 
     @NotNull
-    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "hotel_id")
     Hotel hotel;
 

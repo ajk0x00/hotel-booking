@@ -5,6 +5,7 @@ import com.hotel.api.booking.exception.HotelNotFoundException;
 import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.Hotel;
 import com.hotel.api.booking.model.User;
+import com.hotel.api.booking.repository.BookingRepository;
 import com.hotel.api.booking.repository.HotelRepository;
 import com.hotel.api.booking.repository.RoomRepository;
 import com.hotel.api.booking.service.AuthenticationService;
@@ -31,6 +32,7 @@ public class HotelController {
     private final AuthenticationService authService;
     private final RoomRepository roomRepo;
     private final Supplier<HotelNotFoundException> hotelNotFoundException = HotelNotFoundException::new;
+    private final BookingRepository bookingRepo;
 
 
     @Operation(summary = "List all hotels in the database")
@@ -86,6 +88,7 @@ public class HotelController {
     @ResponseStatus(HttpStatus.OK)
     public EntityCreatedDTO deleteHotel(@PathVariable Long id) {
         Hotel targetHotel = hotelRepo.findById(id).orElseThrow(hotelNotFoundException);
+        bookingRepo.deleteByHotelId(id);
         roomRepo.deleteByHotelId(id);
         hotelRepo.delete(targetHotel);
         return new EntityCreatedDTO(targetHotel.getId(), "Hotel deleted successfully");
