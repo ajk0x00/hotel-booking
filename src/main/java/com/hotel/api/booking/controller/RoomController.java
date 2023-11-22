@@ -3,10 +3,7 @@ package com.hotel.api.booking.controller;
 import com.hotel.api.booking.dto.EntityCreatedDTO;
 import com.hotel.api.booking.dto.RoomDTO;
 import com.hotel.api.booking.dto.RoomRequestDTO;
-import com.hotel.api.booking.exception.HotelNotFoundException;
-import com.hotel.api.booking.exception.RoomNotFoundException;
-import com.hotel.api.booking.exception.RoomNotFoundInHotelException;
-import com.hotel.api.booking.exception.UnauthorizedUserException;
+import com.hotel.api.booking.exception.*;
 import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.Hotel;
 import com.hotel.api.booking.model.Room;
@@ -19,6 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,7 +36,6 @@ public class RoomController {
 
     private final Supplier<RoomNotFoundException> roomNotFoundException = RoomNotFoundException::new;
     private final Supplier<HotelNotFoundException> hotelNotFoundException = HotelNotFoundException::new;
-
 
     @Operation(summary = "List all rooms in a specific hotel")
     @GetMapping("/")
@@ -79,7 +76,12 @@ public class RoomController {
         Room room = new Room();
         GeneralUtils.map(roomDTO, room, false);
         room.setHotel(hotel);
-        roomRepo.save(room);
+        try {
+            roomRepo.save(room);
+            roomRepo.flush();
+        } catch (DataIntegrityViolationException ignored) {
+            throw new RoomAlreadyExistException();
+        }
         return new EntityCreatedDTO(room.getId(), "Room created successfully");
     }
 

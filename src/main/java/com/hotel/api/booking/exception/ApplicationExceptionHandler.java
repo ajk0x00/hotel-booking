@@ -58,6 +58,12 @@ public class ApplicationExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorDTO handleBookingNotFound(BookingNotFoundException exception) {
         logger.logException(exception);
-        return new ErrorDTO(301, "Unable to find booking");
+        return new ErrorDTO(1206, "Unable to find booking");
+    }
+
+    @ExceptionHandler(RoomAlreadyExistException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorDTO handleRoomAlreadyExist(RoomAlreadyExistException exception) {
+        return new ErrorDTO(1207, "Room with same room number already exist in the hotel");
     }
 }

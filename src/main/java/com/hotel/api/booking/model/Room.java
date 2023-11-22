@@ -13,6 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"roomNumber", "hotel_id"})})
 @Entity
 public class Room {
 
@@ -20,7 +21,6 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
-    // TODO: Add a composite unique key with hotel
     @NotNull
     int roomNumber;
 
