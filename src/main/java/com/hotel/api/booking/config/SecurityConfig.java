@@ -1,6 +1,6 @@
 package com.hotel.api.booking.config;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -10,8 +10,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
-@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -19,6 +19,16 @@ public class SecurityConfig {
 
     public final AuthenticationProvider authProvider;
     public final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final HandlerExceptionResolver exceptionResolver;
+
+    public SecurityConfig(AuthenticationProvider authProvider,
+                          JwtAuthenticationFilter jwtAuthenticationFilter,
+                          @Qualifier("handlerExceptionResolver")
+                          HandlerExceptionResolver exceptionResolver) {
+        this.authProvider = authProvider;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.exceptionResolver = exceptionResolver;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -33,6 +43,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .authenticationProvider(authProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(
+                        handle -> handle.accessDeniedHandler((req, res, exp) ->
+                                exceptionResolver.resolveException(req, res, null, exp)))
                 .build();
     }
 }
