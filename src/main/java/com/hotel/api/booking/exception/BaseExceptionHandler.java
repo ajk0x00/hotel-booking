@@ -20,15 +20,6 @@ public class BaseExceptionHandler {
 
     Logger logger = new Logger(this);
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ValidationErrorDTO handleBadRequest(MethodArgumentNotValidException exception) {
-        Map<String, String> errors = new HashMap<>();
-        exception.getFieldErrors().forEach(fieldError ->
-                errors.put(fieldError.getField(), fieldError.getDefaultMessage()));
-        return new ValidationErrorDTO(101, errors);
-    }
-
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ErrorDTO handleAllUncaughtExceptions(Exception e) {
@@ -36,24 +27,33 @@ public class BaseExceptionHandler {
         return new ErrorDTO(1000, "Something went wrong :(");
     }
 
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ValidationErrorDTO handleBadRequest(MethodArgumentNotValidException exception) {
+        Map<String, String> errors = new HashMap<>();
+        exception.getFieldErrors().forEach(fieldError ->
+                errors.put(fieldError.getField(), fieldError.getDefaultMessage()));
+        return new ValidationErrorDTO(1001, errors);
+    }
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ErrorDTO handleBadRequests(HttpMessageNotReadableException e) {
         logger.logException(e);
-        return new ErrorDTO(1001, "Bad request format");
+        return new ErrorDTO(1002, "Bad request format");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ErrorDTO handleBadRequests(DataIntegrityViolationException e) {
         logger.logException(e);
-        return new ErrorDTO(1002, "Bad request format");
+        return new ErrorDTO(1003, "Bad request format");
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ErrorDTO handleBadRequests(HttpRequestMethodNotSupportedException e) {
         logger.logException(e);
-        return new ErrorDTO(1002, "Bad request");
+        return new ErrorDTO(1004, "Bad request");
     }
 }
