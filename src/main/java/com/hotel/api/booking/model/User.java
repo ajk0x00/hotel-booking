@@ -44,7 +44,7 @@ public class User implements UserDetails {
     @NotNull
     private Authority authority;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     Set<Booking> bookings = new HashSet<>();
 
     public User(String name, String email, String password, Authority authority) {
