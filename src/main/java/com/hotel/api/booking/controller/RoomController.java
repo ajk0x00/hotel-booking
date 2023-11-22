@@ -6,8 +6,11 @@ import com.hotel.api.booking.dto.RoomRequestDTO;
 import com.hotel.api.booking.exception.HotelNotFoundException;
 import com.hotel.api.booking.exception.RoomNotFoundException;
 import com.hotel.api.booking.exception.RoomNotFoundInHotelException;
+import com.hotel.api.booking.exception.UnauthorizedUserException;
+import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.Hotel;
 import com.hotel.api.booking.model.Room;
+import com.hotel.api.booking.model.User;
 import com.hotel.api.booking.repository.BookingRepository;
 import com.hotel.api.booking.repository.HotelRepository;
 import com.hotel.api.booking.repository.RoomRepository;
@@ -18,6 +21,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -64,10 +68,16 @@ public class RoomController {
     @ResponseStatus(HttpStatus.CREATED)
     public EntityCreatedDTO createRoom(@Valid @RequestBody RoomRequestDTO roomDTO,
                                        @PathVariable Long hotelId) {
-        // TODO: validate if the hotel id belongs to the authenticated user
+        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(hotelNotFoundException);
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User bookingUser = hotel.getUser();
+        String authority = currentUser.getAuthorities()
+                .stream().findFirst().orElseThrow().getAuthority();
+        if (authority.equals(Authority.HOTEL.name()) &&
+                !currentUser.getEmail().equals(bookingUser.getEmail()))
+            throw new UnauthorizedUserException();
         Room room = new Room();
         GeneralUtils.map(roomDTO, room, false);
-        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(hotelNotFoundException);
         room.setHotel(hotel);
         roomRepo.save(room);
         return new EntityCreatedDTO(room.getId(), "Room created successfully");
@@ -82,9 +92,15 @@ public class RoomController {
     public EntityCreatedDTO updateRoom(@Valid @RequestBody RoomRequestDTO sourceRoomDTO,
                                        @PathVariable Long hotelId,
                                        @PathVariable Long roomId) {
-        // TODO: validate if the hotel id belongs to the authenticated user
         Room targetRoom = roomRepo.findByRoomIdAndHotelId(hotelId, roomId).orElseThrow(roomNotFoundException);
         Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(hotelNotFoundException);
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User bookingUser = hotel.getUser();
+        String authority = currentUser.getAuthorities()
+                .stream().findFirst().orElseThrow().getAuthority();
+        if (authority.equals(Authority.HOTEL.name()) &&
+                !currentUser.getEmail().equals(bookingUser.getEmail()))
+            throw new UnauthorizedUserException();
         if (hotel.getRooms().contains(targetRoom))
             throw new RoomNotFoundInHotelException();
         GeneralUtils.map(sourceRoomDTO, targetRoom, false);
@@ -100,9 +116,15 @@ public class RoomController {
     @ResponseStatus(HttpStatus.OK)
     public EntityCreatedDTO deleteRoom(@PathVariable Long hotelId,
                                        @PathVariable Long roomId) {
-        // TODO: validate if the hotel id belongs to the authenticated user
         Room targetRoom = roomRepo.findByRoomIdAndHotelId(hotelId, roomId).orElseThrow(roomNotFoundException);
         Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(hotelNotFoundException);
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User bookingUser = hotel.getUser();
+        String authority = currentUser.getAuthorities()
+                .stream().findFirst().orElseThrow().getAuthority();
+        if (authority.equals(Authority.HOTEL.name()) &&
+                !currentUser.getEmail().equals(bookingUser.getEmail()))
+            throw new UnauthorizedUserException();
         if (hotel.getRooms().contains(targetRoom))
             throw new RoomNotFoundInHotelException();
         bookingRepo.deleteByRoomId(roomId);

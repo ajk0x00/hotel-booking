@@ -107,8 +107,14 @@ public class BookingController {
                                    @PathVariable Long bookingId,
                                    @PathVariable Long hotelId,
                                    @PathVariable Long roomId) {
-        // TODO: check if the booking belongs to the user
         Booking booking = bookingRepo.findById(bookingId).orElseThrow(bookingNotFoundException);
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User bookingUser = booking.getUser();
+        String authority = currentUser.getAuthorities()
+                .stream().findFirst().orElseThrow().getAuthority();
+        if (authority.equals(Authority.USER.name()) &&
+                !currentUser.getEmail().equals(bookingUser.getEmail()))
+            throw new UnauthorizedUserException();
         Room room = booking.getRoom();
         boolean isRoomUnAvailable = room.getStatus() == RoomStatus.UNAVAILABLE;
         boolean isRoomAlreadyBooked = bookingRepo.isRoomAlreadyBooked(roomId, bookingId, bookingDTO.checkIn(), bookingDTO.checkOut());
@@ -124,11 +130,17 @@ public class BookingController {
 
     @Transactional
     @PreAuthorize("hasAuthority('ADMIN')")
-    @DeleteMapping("/{bookingId}")
+    @DeleteMapping("rooms/{roomId}/bookings/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
     public EntityCreatedDTO cancelBooking(@PathVariable Long bookingId) {
-        // TODO: check if the booking belongs to the user
         Booking booking = bookingRepo.findById(bookingId).orElseThrow(bookingNotFoundException);
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User bookingUser = booking.getUser();
+        String authority = currentUser.getAuthorities()
+                .stream().findFirst().orElseThrow().getAuthority();
+        if (authority.equals(Authority.USER.name()) &&
+                !currentUser.getEmail().equals(bookingUser.getEmail()))
+            throw new UnauthorizedUserException();
         return new EntityCreatedDTO(booking.getId(), "Booking cancelled successfully");
     }
 }
