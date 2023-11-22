@@ -42,4 +42,11 @@ public class AuthenticationExceptionHandler {
         logger.logException(exception);
         return new ErrorDTO(1103, "Username or password is incorrect");
     }
+
+    @ExceptionHandler(UnauthorizedUserException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorDTO unauthenticatedUserInAuthenticatedEndPoint(UnauthorizedUserException exception) {
+        logger.logException(exception);
+        return new ErrorDTO(1104, "User is not authorized to access this resource");
+    }
 }

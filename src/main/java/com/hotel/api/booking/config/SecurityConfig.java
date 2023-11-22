@@ -12,6 +12,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
+import java.util.List;
+import java.util.regex.Pattern;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -20,6 +23,14 @@ public class SecurityConfig {
     public final AuthenticationProvider authProvider;
     public final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final HandlerExceptionResolver exceptionResolver;
+
+    public static List<Pattern> publicEndPoints = List.of(
+            Pattern.compile("/api/v1/users/login"),
+            Pattern.compile("/api/v1/users/sign-up"),
+            Pattern.compile("/swagger-ui/*"),
+            Pattern.compile("/v3/api-docs"),
+            Pattern.compile("/v3/api-docs/*")
+    );
 
     public SecurityConfig(AuthenticationProvider authProvider,
                           JwtAuthenticationFilter jwtAuthenticationFilter,

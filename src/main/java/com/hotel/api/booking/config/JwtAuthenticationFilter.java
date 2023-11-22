@@ -1,5 +1,6 @@
 package com.hotel.api.booking.config;
 
+import com.hotel.api.booking.exception.UnauthorizedUserException;
 import com.hotel.api.booking.service.JwtService;
 import com.hotel.api.booking.util.Logger;
 import jakarta.servlet.FilterChain;
@@ -18,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 @Configuration
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -39,9 +41,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         Logger logger = new Logger(this);
         String authHeader = request.getHeader("Authorization");
+        String pathSegment = request.getRequestURI();
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            // TODO: handle empty token on authenticated endpoints
-            filterChain.doFilter(request, response);
+            for (Pattern pattern : SecurityConfig.publicEndPoints) {
+                if (pattern.matcher(pathSegment).find()) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+            }
+            exceptionResolver.resolveException(request, response, null,
+                    new UnauthorizedUserException());
             return;
         }
         String token = authHeader.replace("Bearer ", "");
