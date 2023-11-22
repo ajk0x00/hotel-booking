@@ -9,6 +9,9 @@ import com.hotel.api.booking.repository.BookingRepository;
 import com.hotel.api.booking.repository.HotelRepository;
 import com.hotel.api.booking.repository.RoomRepository;
 import com.hotel.api.booking.util.GeneralUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.function.Supplier;
 
+
+@Tag(name = "Booking API", description = "API endpoints for managing booking")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/hotels/{hotelId}/")
@@ -32,6 +38,7 @@ public class BookingController {
     private final Supplier<HotelNotFoundException> hotelNotFoundException = HotelNotFoundException::new;
     private final Supplier<BookingNotFoundException> bookingNotFoundException = BookingNotFoundException::new;
 
+    @Operation(summary = "List all bookings that belongs to a hotel")
     @Transactional
     @GetMapping("/bookings")
     public List<BookingDTO> listAllBookingsOfSpecificHotel(@PathVariable Long hotelId) {
@@ -44,6 +51,7 @@ public class BookingController {
                 .toList();
     }
 
+    @Operation(summary = "List all bookings registered on a specific room")
     @GetMapping("rooms/{roomId}/bookings")
     List<BookingDTO> listAllBooking(@PathVariable Long hotelId, @PathVariable Long roomId) {
         User currentUser = (User) SecurityContextHolder.getContext()
@@ -60,6 +68,7 @@ public class BookingController {
                 )).toList();
     }
 
+    @Operation(summary = "Get details about a specific booking")
     @GetMapping("rooms/{roomId}/bookings/{bookingId}")
     BookingDTO getBookingDetails(@PathVariable Long hotelId,
                                  @PathVariable Long roomId,
@@ -74,6 +83,7 @@ public class BookingController {
                 booking.getCheckIn(), booking.getCheckOut());
     }
 
+    @Operation(summary = "Book a room in a Hotel")
     @Transactional
     @PostMapping("rooms/{roomId}/bookings")
     @ResponseStatus(HttpStatus.CREATED)
@@ -100,6 +110,7 @@ public class BookingController {
         return new EntityCreatedDTO(booking.getId(), "Room Booked successfully");
     }
 
+    @Operation(summary = "Update details of a booking")
     @Transactional
     @PutMapping("rooms/{roomId}/bookings/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
@@ -128,6 +139,7 @@ public class BookingController {
         return new EntityCreatedDTO(booking.getId(), "Booking updated successfully");
     }
 
+    @Operation(summary = "Cancel a specific booking")
     @Transactional
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("rooms/{roomId}/bookings/{bookingId}")

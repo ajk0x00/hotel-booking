@@ -13,6 +13,8 @@ import com.hotel.api.booking.repository.HotelRepository;
 import com.hotel.api.booking.repository.RoomRepository;
 import com.hotel.api.booking.util.GeneralUtils;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.function.Supplier;
 
+
+@Tag(name = "Rooms API", description = "API endpoints for managing rooms")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/hotels/{hotelId}/rooms/")
