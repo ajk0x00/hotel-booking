@@ -61,9 +61,13 @@ public class BookingController {
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
     @GetMapping("rooms/{roomId}/bookings")
     List<BookingDTO> listAllBooking(@PathVariable Long hotelId, @PathVariable Long roomId) {
+        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(hotelNotFoundException);
         User currentUser = (User) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
-        return bookingRepo.findAllUserBookingByRoomAndHotelId(hotelId, roomId, currentUser.getId())
+        if (currentUser.getAuthority().equals(Authority.HOTEL) &&
+                !hotel.getUser().getEmail().equals(currentUser.getEmail()))
+            throw new UnauthorizedUserException();
+        return bookingRepo.findAllUserBookingByRoomAndHotelId(hotelId, roomId)
                 .stream()
                 .map(booking -> new BookingDTO(
                         booking.getId(),
