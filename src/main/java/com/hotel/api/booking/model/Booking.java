@@ -18,34 +18,34 @@ public class Booking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
+    private Long id;
 
     @NotNull
     @NotBlank
-    String guestName;
+    private String guestName;
 
     @NotNull
     @Embedded
-    ContactInfo contactInfo;
+    private ContactInfo contactInfo;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id")
-    Hotel hotel;
+    private Hotel hotel;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
-    Room room;
+    private Room room;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    User user;
+    private User user;
 
     @NotNull
-    Date checkIn;
+    private Date checkIn;
 
     @NotNull
-    Date checkOut;
+    private Date checkOut;
 }

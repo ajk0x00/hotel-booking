@@ -19,27 +19,27 @@ public class Room {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
+    private Long id;
 
     @NotNull
-    int roomNumber;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    RoomType type;
-
-    @NotNull
-    double price;
+    private int roomNumber;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    RoomStatus status;
+    private RoomType type;
+
+    @NotNull
+    private double price;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private RoomStatus status;
 
     @NotNull
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id")
-    Hotel hotel;
+    private Hotel hotel;
 
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
-    Set<Booking> booking = new HashSet<>();
+    private Set<Booking> booking = new HashSet<>();
 }

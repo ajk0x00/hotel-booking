@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class AuthenticationExceptionHandler {
 
-    Logger logger = new Logger(this);
+    private final Logger logger = new Logger(this);
 
     @ExceptionHandler(UserAlreadyExistException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
