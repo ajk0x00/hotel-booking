@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    public final AuthenticationProvider authProvider;
-    public final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthenticationProvider authProvider;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final HandlerExceptionResolver exceptionResolver;
     private final CorsConfigurationSource configurationSource;
 

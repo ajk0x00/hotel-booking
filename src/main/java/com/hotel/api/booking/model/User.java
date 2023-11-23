@@ -23,11 +23,11 @@ import java.util.Set;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
+    private Long id;
 
     @NotBlank
     @NotNull
-    String name;
+    private String name;
 
     @NotBlank
     @NotNull
@@ -45,7 +45,7 @@ public class User implements UserDetails {
     private Authority authority;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    Set<Booking> bookings = new HashSet<>();
+    private Set<Booking> bookings = new HashSet<>();
 
     public User(String name, String email, String password, Authority authority) {
         this.name = name;

@@ -18,27 +18,27 @@ import java.util.Set;
 public class Hotel {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
+    private Long id;
 
     @NotNull
     @NotBlank
-    String name;
+    private String name;
 
     @NotNull
-    int roomCount;
+    private int roomCount;
 
     @Embedded
     @NotNull
-    GeoLocation location;
+    private GeoLocation location;
 
     @NotNull
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    User user;
+    private User user;
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    Set<Room> rooms = new HashSet<>();
+    private Set<Room> rooms = new HashSet<>();
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    Set<Booking> bookings = new HashSet<>();
+    private Set<Booking> bookings = new HashSet<>();
 }

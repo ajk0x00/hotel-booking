@@ -19,7 +19,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class BaseExceptionHandler {
 
-    Logger logger = new Logger(this);
+    private final Logger logger = new Logger(this);
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
