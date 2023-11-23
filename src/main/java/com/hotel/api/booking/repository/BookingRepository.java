@@ -18,9 +18,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllUserBookingByRoomAndHotelId(Long hotelId, Long roomId, Long userId);
 
     @Query("select booking from Booking booking where booking.id = :bookingId " +
-            "and booking.hotel.id = :hotelId and booking.room.id = :roomId " +
-            "and booking.user.id = :userId")
-    Optional<Booking> findUserBookingByRoomAndHotelId(Long bookingId, Long hotelId, Long roomId, Long userId);
+            "and booking.hotel.id = :hotelId and booking.room.id = :roomId ")
+    Optional<Booking> findUserBookingByRoomAndHotelId(Long bookingId, Long hotelId, Long roomId);
 
     @Query("select exists (select booking from Booking booking where booking.room.id = :roomId " +
             "and (booking.checkIn between :checkIn and :checkOut " +

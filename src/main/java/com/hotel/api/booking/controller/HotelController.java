@@ -72,7 +72,7 @@ public class HotelController {
 
     @Operation(summary = "Edit an already existing hotel")
     @Transactional
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public EntityCreatedDTO updateHotel(@Valid @RequestBody HotelRequestDTO sourceHotel, @PathVariable Long id) {
