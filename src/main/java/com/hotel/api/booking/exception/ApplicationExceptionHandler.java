@@ -23,7 +23,7 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(RoomAlreadyBookedException.class)
     public ErrorDTO handleRoomAlreadyBooked(RoomAlreadyBookedException exception) {
         logger.logException(exception);
-        return new ErrorDTO(1201, "Room Unavailable");
+        return new ErrorDTO(1201, "Requested room is already booked");
     }
 
     @ExceptionHandler(RoomNotFoundException.class)
