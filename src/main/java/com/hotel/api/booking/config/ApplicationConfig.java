@@ -18,7 +18,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.function.Supplier;
 
 @RequiredArgsConstructor
@@ -73,7 +73,7 @@ public class ApplicationConfig {
         corsConfig.addAllowedMethod("OPTIONS");
         corsConfig.addAllowedMethod("DELETE");
         corsConfig.addAllowedOriginPattern("*");
-        corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Requestor-Type"));
+        corsConfig.setAllowedHeaders(List.of("Authorization"));
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfig);

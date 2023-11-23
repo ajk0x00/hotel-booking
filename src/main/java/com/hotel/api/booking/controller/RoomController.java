@@ -52,7 +52,6 @@ public class RoomController {
                 .toList();
     }
 
-
     @Operation(summary = "Get information about a specific Room")
     @GetMapping("/{roomId}")
     public RoomDTO getRoomDetails(@PathVariable Long hotelId,
@@ -61,7 +60,6 @@ public class RoomController {
         return new RoomDTO(room.getId(), room.getRoomNumber(),
                 room.getType(), room.getPrice(), room.getStatus());
     }
-
 
     @Operation(summary = "Create a new Room inside a specific hotel")
     @Transactional
@@ -90,7 +88,6 @@ public class RoomController {
         return new EntityCreatedDTO(room.getId(), "Room created successfully");
     }
 
-
     @Operation(summary = "Update details about a specific room")
     @Transactional
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
@@ -114,7 +111,6 @@ public class RoomController {
         roomRepo.save(targetRoom);
         return new EntityCreatedDTO(targetRoom.getId(), "Room updated successfully");
     }
-
 
     @Operation(summary = "Delete a room")
     @Transactional

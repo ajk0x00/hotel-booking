@@ -69,7 +69,6 @@ public class HotelController {
         return new EntityCreatedDTO(hotel.getId(), "Hotel created successfully");
     }
 
-
     @Operation(summary = "Edit an already existing hotel")
     @Transactional
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
@@ -81,7 +80,6 @@ public class HotelController {
         hotelRepo.save(targetHotel);
         return new EntityCreatedDTO(targetHotel.getId(), "Hotel updated successfully");
     }
-
 
     @Operation(summary = "Delete a hotel")
     @Transactional
