@@ -3,6 +3,7 @@ package com.hotel.api.booking.exception;
 import com.hotel.api.booking.dto.ErrorDTO;
 import com.hotel.api.booking.dto.ValidationErrorDTO;
 import com.hotel.api.booking.util.Logger;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -56,4 +57,14 @@ public class BaseExceptionHandler {
         logger.logException(e);
         return new ErrorDTO(1004, "Bad request");
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ErrorDTO handleInvalidRequests(ConstraintViolationException exception) {
+        StringBuffer errors = new StringBuffer();
+        exception.getConstraintViolations()
+                .forEach(violation -> errors.append(violation.getMessage()).append(","));
+        return new ErrorDTO(1001, errors.toString());
+    }
+
 }
