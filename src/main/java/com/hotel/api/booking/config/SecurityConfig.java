@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class SecurityConfig {
     public final AuthenticationProvider authProvider;
     public final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final HandlerExceptionResolver exceptionResolver;
+    private final CorsConfigurationSource configurationSource;
 
     public static List<Pattern> publicEndPoints = List.of(
             Pattern.compile("/api/v1/users/login"),
@@ -35,10 +37,13 @@ public class SecurityConfig {
     public SecurityConfig(AuthenticationProvider authProvider,
                           JwtAuthenticationFilter jwtAuthenticationFilter,
                           @Qualifier("handlerExceptionResolver")
-                          HandlerExceptionResolver exceptionResolver) {
+                          HandlerExceptionResolver exceptionResolver,
+                          @Qualifier("corsConfiguration")
+                          CorsConfigurationSource configurationSource) {
         this.authProvider = authProvider;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.exceptionResolver = exceptionResolver;
+        this.configurationSource = configurationSource;
     }
 
     @Bean
@@ -57,6 +62,7 @@ public class SecurityConfig {
                 .exceptionHandling(
                         handle -> handle.accessDeniedHandler((req, res, exp) ->
                                 exceptionResolver.resolveException(req, res, null, exp)))
+                .cors(corsConfigurer -> corsConfigurer.configurationSource(configurationSource))
                 .build();
     }
 }

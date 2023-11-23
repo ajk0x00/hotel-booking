@@ -40,6 +40,7 @@ public class BookingController {
 
     @Operation(summary = "List all bookings that belongs to a hotel")
     @Transactional
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
     @GetMapping("/bookings")
     public List<BookingDTO> listAllBookingsOfSpecificHotel(@PathVariable Long hotelId) {
         return bookingRepo.findAllByHotelId(hotelId)
@@ -52,6 +53,7 @@ public class BookingController {
     }
 
     @Operation(summary = "List all bookings registered on a specific room")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
     @GetMapping("rooms/{roomId}/bookings")
     List<BookingDTO> listAllBooking(@PathVariable Long hotelId, @PathVariable Long roomId) {
         User currentUser = (User) SecurityContextHolder.getContext()
@@ -76,7 +78,10 @@ public class BookingController {
         User currentUser = (User) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
         Booking booking = bookingRepo.findUserBookingByRoomAndHotelId(bookingId, hotelId,
-                roomId, currentUser.getId()).orElseThrow(bookingNotFoundException);
+                roomId).orElseThrow(bookingNotFoundException);
+        if (currentUser.getAuthority().equals(Authority.USER))
+            if (!currentUser.getEmail().equals(booking.getUser().getEmail()))
+                throw new UnauthorizedUserException();
         return new BookingDTO(
                 booking.getId(), booking.getRoom().getId(),
                 booking.getGuestName(), booking.getContactInfo(),
@@ -141,7 +146,6 @@ public class BookingController {
 
     @Operation(summary = "Cancel a specific booking")
     @Transactional
-    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("rooms/{roomId}/bookings/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
     public EntityCreatedDTO cancelBooking(@PathVariable Long bookingId) {
