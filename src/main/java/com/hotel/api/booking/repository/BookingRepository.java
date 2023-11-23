@@ -14,8 +14,8 @@ import java.util.Optional;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("select booking from Booking booking where booking.hotel.id = :hotelId " +
-            "and booking.room.id = :roomId and booking.user.id = :userId")
-    List<Booking> findAllUserBookingByRoomAndHotelId(Long hotelId, Long roomId, Long userId);
+            "and booking.room.id = :roomId")
+    List<Booking> findAllUserBookingByRoomAndHotelId(Long hotelId, Long roomId);
 
     @Query("select booking from Booking booking where booking.id = :bookingId " +
             "and booking.hotel.id = :hotelId and booking.room.id = :roomId ")
