@@ -31,7 +31,7 @@ public class AuthenticationService {
     @Transactional
     public User signup(UserDTO requestDTO, Authority authority) {
         String name = requestDTO.name();
-        String email = requestDTO.email();
+        String email = requestDTO.email().toLowerCase();
         String password = passwordEncoder.encode(requestDTO.password());
 
         User user = new User(
@@ -51,7 +51,7 @@ public class AuthenticationService {
     }
 
     public User login(AuthenticationRequestDTO requestDTO) {
-        String username = requestDTO.email();
+        String username = requestDTO.email().toLowerCase();
         String password = requestDTO.password();
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
