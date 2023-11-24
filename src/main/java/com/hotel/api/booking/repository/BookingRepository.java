@@ -23,7 +23,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("select exists (select booking from Booking booking where booking.room.id = :roomId " +
             "and (booking.checkIn between :checkIn and :checkOut " +
-            "or booking.checkOut between :checkIn and :checkOut))")
+            "or booking.checkOut between :checkIn and :checkOut " +
+            "or :checkIn between booking.checkIn and booking.checkOut))")
     boolean isRoomAlreadyBooked(Long roomId, Date checkIn, Date checkOut);
 
     @Query("select exists (select booking from Booking booking where booking.room.id = :roomId " +
@@ -35,7 +36,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByHotelId(Long id);
 
     @Query("select booking from Booking booking where booking.hotel.id = :hotelId and " +
-            "(booking.checkIn between :checkIn and :checkOut or booking.checkOut between :checkIn and :checkOut)")
+            "(booking.checkIn between :checkIn and :checkOut or " +
+            "booking.checkOut between :checkIn and :checkOut or " +
+            ":checkIn between booking.checkIn and booking.checkOut)")
     List<Booking> findAllByHotelIdAndDate(Long hotelId, Date checkIn, Date checkOut);
 
     @Query("select booking from Booking booking join booking.hotel hotel where hotel.id = :id and booking.user.id = :userId")
