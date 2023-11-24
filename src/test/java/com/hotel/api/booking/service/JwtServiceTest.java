@@ -21,7 +21,7 @@ public class JwtServiceTest {
 
     @BeforeEach
     public void instantiate() {
-        jwtService = new JwtService("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJpYXQiOjE3MDA1NTE4NDgsImV4cCI6MTcwMDcyNDY0OH0.dxYp9z8fkU_KguMbT8dIelOMEBNMk1s65cG2x5rjzr0");
+        jwtService = new JwtService("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJpYXQiOjE3MDA3OTk0ODAsImV4cCI6MTcwMDk3MjI4MH0.uKVRrWxaYIvndPM0V4OKPUhvg1-5QwonSB9dI_aWfuA");
     }
 
     @Test

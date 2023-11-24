@@ -60,7 +60,7 @@ public class UserControllerTest {
 
     @Test
     void shouldReturnTokenOnValidSignupRequest() throws Exception {
-        UserDTO requestDTO = new UserDTO("Tester", "tester@admin.com", "tester");
+        UserDTO requestDTO = new UserDTO("Tester", "tester@admin.com", "tester1234");
         mockMvc.perform(post("/api/v1/users/sign-up")
                         .contentType("application/json")
                         .content(mapper.writeValueAsString(requestDTO)))
@@ -75,7 +75,7 @@ public class UserControllerTest {
 
     @Test
     void shouldReturnForbiddenIfUserAlreadyExist() throws Exception {
-        UserDTO requestDTO = new UserDTO("Tester", "admin@admin.com", "tester");
+        UserDTO requestDTO = new UserDTO("Tester", "admin@admin.com", "tester12345");
         mockMvc.perform(post("/api/v1/users/sign-up")
                         .contentType("application/json")
                         .content(mapper.writeValueAsString(requestDTO)))

@@ -89,7 +89,7 @@ public class HotelControllerTest {
         mockMvc.perform(post("/api/v1/hotels/")
                         .contentType("application/json")
                         .content(mapper.writeValueAsString(hotelCreateDTO)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test
