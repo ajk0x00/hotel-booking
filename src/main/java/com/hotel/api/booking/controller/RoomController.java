@@ -55,7 +55,7 @@ public class RoomController {
 
     @Operation(summary = "List all available rooms in a specified date range")
     @GetMapping("/available")
-    public List<RoomDTO> availableRooms(@PathVariable Long hotelId, @RequestBody AvailabilityCheckDTO checkDTO) {
+    public List<RoomDTO> availableRooms(@PathVariable Long hotelId, AvailabilityCheckDTO checkDTO) {
         if (checkDTO.checkOut().before(checkDTO.checkIn()))
             throw new CheckOutBeforeCheckInException();
         if (checkDTO.checkIn().before(new Date(System.currentTimeMillis())))
