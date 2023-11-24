@@ -21,4 +21,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     @Modifying
     @Query("delete from Room room where room.hotel.id = :id")
     void deleteByHotelId(Long id);
+
+    @Query("select count(room) from Room room where room.hotel.id = :id")
+    int getRoomCountByHotelId(Long id);
 }

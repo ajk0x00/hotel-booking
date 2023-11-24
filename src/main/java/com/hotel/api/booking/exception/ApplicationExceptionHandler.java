@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.sql.Date;
+
 @RestControllerAdvice
 public class ApplicationExceptionHandler {
 
@@ -64,6 +66,35 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(RoomAlreadyExistException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorDTO handleRoomAlreadyExist(RoomAlreadyExistException exception) {
+        logger.logException(exception);
         return new ErrorDTO(1207, "Room with same room number already exist in the hotel");
+    }
+
+    @ExceptionHandler(HotelAlreadyExistException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorDTO handleRoomAlreadyExist(HotelAlreadyExistException exception) {
+        logger.logException(exception);
+        return new ErrorDTO(1207, "Hotel with same admin user already exist in database");
+    }
+
+    @ExceptionHandler(HotelMaximumRoomCountExceededException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorDTO handleHotelAtMaximumRoomLimit(HotelMaximumRoomCountExceededException exception) {
+        logger.logException(exception);
+        return new ErrorDTO(1208, "Unable to create new room. Hotel at its maximum room count");
+    }
+
+    @ExceptionHandler(CheckOutBeforeCheckInException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDTO handleCheckOutBeforeCheckIn(CheckOutBeforeCheckInException exception) {
+        logger.logException(exception);
+        return new ErrorDTO(1209, "Check-out date should be after check-in date");
+    }
+
+    @ExceptionHandler(CheckInInPastException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDTO handleCheckInInPast(CheckInInPastException exception) {
+        logger.logException(exception);
+        return new ErrorDTO(1210, "Check in date should be after " + new Date(System.currentTimeMillis()));
     }
 }

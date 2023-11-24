@@ -20,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -38,13 +39,21 @@ public class BookingController {
     private final Supplier<HotelNotFoundException> hotelNotFoundException = HotelNotFoundException::new;
     private final Supplier<BookingNotFoundException> bookingNotFoundException = BookingNotFoundException::new;
 
-    @Operation(summary = "List all bookings that belongs to a hotel")
+    @Operation(summary = "List all bookings that belongs to a hotel/user")
     @Transactional
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
     @GetMapping("/bookings")
     public List<BookingDTO> listAllBookingsOfSpecificHotel(@PathVariable Long hotelId) {
         Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(hotelNotFoundException);
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (user.getAuthority().equals(Authority.USER)) {
+            return bookingRepo.findAllByHotelIdAndUserId(hotelId, user.getId())
+                    .stream().map(booking ->
+                            new BookingDTO(
+                                    booking.getId(), booking.getRoom().getId(),
+                                    booking.getGuestName(), booking.getContactInfo(),
+                                    booking.getCheckIn(), booking.getCheckOut()))
+                    .toList();
+        }
         if (user.getAuthority().equals(Authority.HOTEL) &&
                 !hotel.getUser().getEmail().equals(user.getEmail()))
             throw new UnauthorizedUserException();
@@ -111,7 +120,10 @@ public class BookingController {
             throw new RoomUnavailableException();
         if (isRoomAlreadyBooked)
             throw new RoomAlreadyBookedException();
-
+        if (bookingDTO.checkOut().before(bookingDTO.checkIn()))
+            throw new CheckOutBeforeCheckInException();
+        if (bookingDTO.checkIn().before(new Date(System.currentTimeMillis())))
+            throw new CheckInInPastException();
         User currentUser = (User) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
         Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(hotelNotFoundException);
@@ -157,7 +169,9 @@ public class BookingController {
     @Transactional
     @DeleteMapping("rooms/{roomId}/bookings/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
-    public EntityCreatedDTO cancelBooking(@PathVariable Long bookingId) {
+    public EntityCreatedDTO cancelBooking(@PathVariable Long bookingId,
+                                          @PathVariable Long roomId,
+                                          @PathVariable Long hotelId) {
         Booking booking = bookingRepo.findById(bookingId).orElseThrow(bookingNotFoundException);
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User bookingUser = booking.getUser();
@@ -166,6 +180,7 @@ public class BookingController {
         if (authority.equals(Authority.USER.name()) &&
                 !currentUser.getEmail().equals(bookingUser.getEmail()))
             throw new UnauthorizedUserException();
+        bookingRepo.deleteById(bookingId);
         return new EntityCreatedDTO(booking.getId(), "Booking cancelled successfully");
     }
 }

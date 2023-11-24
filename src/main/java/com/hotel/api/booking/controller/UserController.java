@@ -3,14 +3,17 @@ package com.hotel.api.booking.controller;
 import com.hotel.api.booking.dto.AuthenticationRequestDTO;
 import com.hotel.api.booking.dto.AuthenticationResponseDTO;
 import com.hotel.api.booking.dto.UserDTO;
+import com.hotel.api.booking.exception.UserAlreadyExistException;
 import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.User;
 import com.hotel.api.booking.service.AuthenticationService;
 import com.hotel.api.booking.service.JwtService;
+import com.hotel.api.booking.util.Logger;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final AuthenticationService authService;
+    private final Logger logger = new Logger(this);
 
     @Operation(summary = "Authenticate a user")
     @PostMapping("/login")
@@ -36,8 +40,13 @@ public class UserController {
     @Operation(summary = "Create a new user")
     @PostMapping("/sign-up")
     public AuthenticationResponseDTO signup(@Valid @RequestBody UserDTO requestDTO) {
-        User user = authService.signup(requestDTO, Authority.USER);
-        String token = JwtService.generateToken(user);
-        return new AuthenticationResponseDTO(token);
+        try {
+            User user = authService.signup(requestDTO, Authority.USER);
+            String token = JwtService.generateToken(user);
+            return new AuthenticationResponseDTO(token);
+        } catch (DataIntegrityViolationException exception) {
+            logger.logException(exception);
+            throw new UserAlreadyExistException();
+        }
     }
 }
