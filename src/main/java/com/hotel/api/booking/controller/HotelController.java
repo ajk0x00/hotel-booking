@@ -1,7 +1,9 @@
 package com.hotel.api.booking.controller;
 
 import com.hotel.api.booking.dto.*;
+import com.hotel.api.booking.exception.HotelAlreadyExistException;
 import com.hotel.api.booking.exception.HotelNotFoundException;
+import com.hotel.api.booking.exception.UnauthorizedUserException;
 import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.Hotel;
 import com.hotel.api.booking.model.User;
@@ -16,8 +18,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -61,12 +65,16 @@ public class HotelController {
     @ResponseStatus(HttpStatus.CREATED)
     public EntityCreatedDTO createHotel(@Valid @RequestBody HotelCreateDTO hotelCreate) {
         UserDTO userDTO = hotelCreate.user();
-        User user = authService.signup(userDTO, Authority.HOTEL);
-        Hotel hotel = new Hotel();
-        GeneralUtils.map(hotelCreate, hotel, false);
-        hotel.setUser(user);
-        hotelRepo.save(hotel);
-        return new EntityCreatedDTO(hotel.getId(), "Hotel created successfully");
+        try {
+            User user = authService.signup(userDTO, Authority.HOTEL);
+            Hotel hotel = new Hotel();
+            GeneralUtils.map(hotelCreate, hotel, false);
+            hotel.setUser(user);
+            hotelRepo.save(hotel);
+            return new EntityCreatedDTO(hotel.getId(), "Hotel created successfully");
+        } catch (DataIntegrityViolationException exception) {
+            throw new HotelAlreadyExistException();
+        }
     }
 
     @Operation(summary = "Edit an already existing hotel")
@@ -76,6 +84,10 @@ public class HotelController {
     @ResponseStatus(HttpStatus.OK)
     public EntityCreatedDTO updateHotel(@Valid @RequestBody HotelRequestDTO sourceHotel, @PathVariable Long id) {
         Hotel targetHotel = hotelRepo.findById(id).orElseThrow(hotelNotFoundException);
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (currentUser.getAuthority().equals(Authority.HOTEL) &&
+                !currentUser.getEmail().equals(targetHotel.getUser().getEmail()))
+            throw new UnauthorizedUserException();
         GeneralUtils.map(sourceHotel, targetHotel, false);
         hotelRepo.save(targetHotel);
         return new EntityCreatedDTO(targetHotel.getId(), "Hotel updated successfully");
@@ -88,6 +100,10 @@ public class HotelController {
     @ResponseStatus(HttpStatus.OK)
     public EntityCreatedDTO deleteHotel(@PathVariable Long id) {
         Hotel targetHotel = hotelRepo.findById(id).orElseThrow(hotelNotFoundException);
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (currentUser.getAuthority().equals(Authority.HOTEL) &&
+                !currentUser.getEmail().equals(targetHotel.getUser().getEmail()))
+            throw new UnauthorizedUserException();
         bookingRepo.deleteByHotelId(id);
         roomRepo.deleteByHotelId(id);
         hotelRepo.delete(targetHotel);

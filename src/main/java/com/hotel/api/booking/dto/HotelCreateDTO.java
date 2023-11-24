@@ -9,5 +9,5 @@ import jakarta.validation.constraints.NotNull;
 public record HotelCreateDTO(
         @NotNull @NotBlank String name,
         @NotNull int roomCount,
-        @NotNull @Valid GeoLocation location, UserDTO user) {
+        @NotNull @Valid GeoLocation location, @Valid UserDTO user) {
 }
