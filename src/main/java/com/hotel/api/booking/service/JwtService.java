@@ -15,7 +15,7 @@ import java.util.function.Function;
 
 public class JwtService {
 
-    private static final String SECRET_KEY = System.getenv("JWT_KEY");
+    private static final String SECRET_KEY = "NnhYNlF1UUg1Z1BCcDFkRFBuYmVPdDA1YjFKek9DaFk=";
 
     private final Claims claims;
 

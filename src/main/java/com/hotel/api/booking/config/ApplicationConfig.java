@@ -14,11 +14,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 @RequiredArgsConstructor
@@ -61,23 +57,5 @@ public class ApplicationConfig {
                     passwordEncoder().encode("admin"),
                     Authority.ADMIN
             ));
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfiguration() {
-        CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.applyPermitDefaultValues();
-        corsConfig.setAllowCredentials(true);
-        corsConfig.addAllowedMethod("GET");
-        corsConfig.addAllowedMethod("POST");
-        corsConfig.addAllowedMethod("PUT");
-        corsConfig.addAllowedMethod("OPTIONS");
-        corsConfig.addAllowedMethod("DELETE");
-        corsConfig.addAllowedOriginPattern("*");
-        corsConfig.setAllowedHeaders(List.of("Authorization"));
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfig);
-        return source;
     }
 }

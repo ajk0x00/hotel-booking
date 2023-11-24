@@ -10,9 +10,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -24,7 +28,6 @@ public class SecurityConfig {
     private final AuthenticationProvider authProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final HandlerExceptionResolver exceptionResolver;
-    private final CorsConfigurationSource configurationSource;
 
     public static List<Pattern> publicEndPoints = List.of(
             Pattern.compile("/api/v1/users/login"),
@@ -37,13 +40,10 @@ public class SecurityConfig {
     public SecurityConfig(AuthenticationProvider authProvider,
                           JwtAuthenticationFilter jwtAuthenticationFilter,
                           @Qualifier("handlerExceptionResolver")
-                          HandlerExceptionResolver exceptionResolver,
-                          @Qualifier("corsConfiguration")
-                          CorsConfigurationSource configurationSource) {
+                          HandlerExceptionResolver exceptionResolver) {
         this.authProvider = authProvider;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.exceptionResolver = exceptionResolver;
-        this.configurationSource = configurationSource;
     }
 
     @Bean
@@ -62,7 +62,18 @@ public class SecurityConfig {
                 .exceptionHandling(
                         handle -> handle.accessDeniedHandler((req, res, exp) ->
                                 exceptionResolver.resolveException(req, res, null, exp)))
-                .cors(corsConfigurer -> corsConfigurer.configurationSource(configurationSource))
                 .build();
+    }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        final CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOriginPatterns(Collections.singletonList("*"));
+        config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH"));
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
     }
 }
