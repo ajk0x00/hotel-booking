@@ -1,8 +1,8 @@
 package com.hotel.api.booking.controller;
 
-import com.hotel.api.booking.dto.AuthenticationRequestDTO;
-import com.hotel.api.booking.dto.AuthenticationResponseDTO;
-import com.hotel.api.booking.dto.UserDTO;
+import com.hotel.api.booking.dto.request.AuthenticationRequestDTO;
+import com.hotel.api.booking.dto.response.AuthenticationResponseDTO;
+import com.hotel.api.booking.dto.request.UserDTO;
 import com.hotel.api.booking.exception.UserAlreadyExistException;
 import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.User;

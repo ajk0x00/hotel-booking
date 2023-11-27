@@ -1,7 +1,7 @@
-package com.hotel.api.booking.exception;
+package com.hotel.api.booking.exception.handler;
 
-import com.hotel.api.booking.dto.ErrorDTO;
-import com.hotel.api.booking.dto.ValidationErrorDTO;
+import com.hotel.api.booking.dto.response.ErrorResponseDTO;
+import com.hotel.api.booking.dto.response.ValidationErrorResponseDTO;
 import com.hotel.api.booking.util.Logger;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,48 +23,48 @@ public class BaseExceptionHandler {
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
-    public ErrorDTO handleAllUncaughtExceptions(Exception e) {
+    public ErrorResponseDTO handleAllUncaughtExceptions(Exception e) {
         logger.logException(e);
-        return new ErrorDTO(1000, "Something went wrong :(");
+        return new ErrorResponseDTO(1000, "Something went wrong :(");
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ValidationErrorDTO handleBadRequest(MethodArgumentNotValidException exception) {
+    public ValidationErrorResponseDTO handleBadRequest(MethodArgumentNotValidException exception) {
         Map<String, String> errors = new HashMap<>();
         exception.getFieldErrors().forEach(fieldError ->
                 errors.put(fieldError.getField(), fieldError.getDefaultMessage()));
-        return new ValidationErrorDTO(1001, errors);
+        return new ValidationErrorResponseDTO(1001, errors);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ErrorDTO handleBadRequests(HttpMessageNotReadableException e) {
+    public ErrorResponseDTO handleBadRequests(HttpMessageNotReadableException e) {
         logger.logException(e);
-        return new ErrorDTO(1002, "Bad request format");
+        return new ErrorResponseDTO(1002, "Bad request format");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ErrorDTO handleBadRequests(DataIntegrityViolationException e) {
+    public ErrorResponseDTO handleBadRequests(DataIntegrityViolationException e) {
         logger.logException(e);
-        return new ErrorDTO(1003, "Bad request format");
+        return new ErrorResponseDTO(1003, "Bad request format");
     }
 
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ErrorDTO handleBadRequests(HttpRequestMethodNotSupportedException e) {
+    public ErrorResponseDTO handleBadRequests(HttpRequestMethodNotSupportedException e) {
         logger.logException(e);
-        return new ErrorDTO(1004, "Bad request");
+        return new ErrorResponseDTO(1004, "Bad request");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
-    public ErrorDTO handleInvalidRequests(ConstraintViolationException exception) {
+    public ErrorResponseDTO handleInvalidRequests(ConstraintViolationException exception) {
         StringBuffer errors = new StringBuffer();
         exception.getConstraintViolations()
                 .forEach(violation -> errors.append(violation.getMessage()).append(","));
-        return new ErrorDTO(1001, errors.toString());
+        return new ErrorResponseDTO(1001, errors.toString());
     }
 
 }

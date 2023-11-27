@@ -1,5 +1,6 @@
-package com.hotel.api.booking.config;
+package com.hotel.api.booking.filter;
 
+import com.hotel.api.booking.config.SecurityConfig;
 import com.hotel.api.booking.exception.UnauthorizedUserException;
 import com.hotel.api.booking.service.JwtService;
 import com.hotel.api.booking.util.Logger;

@@ -1,8 +1,8 @@
 package com.hotel.api.booking.controller;
 
-import com.hotel.api.booking.dto.BookingDTO;
-import com.hotel.api.booking.dto.BookingRequestDTO;
-import com.hotel.api.booking.dto.EntityCreatedDTO;
+import com.hotel.api.booking.dto.request.BookingRequestDTO;
+import com.hotel.api.booking.dto.response.BookingResponseDTO;
+import com.hotel.api.booking.dto.response.EntityCreatedResponseDTO;
 import com.hotel.api.booking.exception.*;
 import com.hotel.api.booking.model.*;
 import com.hotel.api.booking.repository.BookingRepository;
@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
-import java.util.function.Supplier;
 
 
 @Tag(name = "Booking API", description = "API endpoints for managing booking")
@@ -35,20 +34,17 @@ public class BookingController {
     private final BookingRepository bookingRepo;
     private final RoomRepository roomRepo;
     private final HotelRepository hotelRepo;
-    private final Supplier<RoomNotFoundException> roomNotFoundException = RoomNotFoundException::new;
-    private final Supplier<HotelNotFoundException> hotelNotFoundException = HotelNotFoundException::new;
-    private final Supplier<BookingNotFoundException> bookingNotFoundException = BookingNotFoundException::new;
 
     @Operation(summary = "List all bookings that belongs to a hotel/user")
     @Transactional
     @GetMapping("/bookings")
-    public List<BookingDTO> listAllBookingsOfSpecificHotel(@PathVariable Long hotelId) {
-        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(hotelNotFoundException);
+    public List<BookingResponseDTO> listAllBookingsOfSpecificHotel(@PathVariable Long hotelId) {
+        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(HotelNotFoundException::new);
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (user.getAuthority().equals(Authority.USER)) {
             return bookingRepo.findAllByHotelIdAndUserId(hotelId, user.getId())
                     .stream().map(booking ->
-                            new BookingDTO(
+                            new BookingResponseDTO(
                                     booking.getId(), booking.getRoom().getId(),
                                     booking.getGuestName(), booking.getContactInfo(),
                                     booking.getCheckIn(), booking.getCheckOut()))
@@ -59,7 +55,7 @@ public class BookingController {
             throw new UnauthorizedUserException();
         return bookingRepo.findAllByHotelId(hotelId)
                 .stream().map(booking ->
-                        new BookingDTO(
+                        new BookingResponseDTO(
                                 booking.getId(), booking.getRoom().getId(),
                                 booking.getGuestName(), booking.getContactInfo(),
                                 booking.getCheckIn(), booking.getCheckOut()))
@@ -69,8 +65,8 @@ public class BookingController {
     @Operation(summary = "List all bookings registered on a specific room")
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
     @GetMapping("rooms/{roomId}/bookings")
-    List<BookingDTO> listAllBooking(@PathVariable Long hotelId, @PathVariable Long roomId) {
-        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(hotelNotFoundException);
+    List<BookingResponseDTO> listAllBooking(@PathVariable Long hotelId, @PathVariable Long roomId) {
+        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(HotelNotFoundException::new);
         User currentUser = (User) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
         if (currentUser.getAuthority().equals(Authority.HOTEL) &&
@@ -78,7 +74,7 @@ public class BookingController {
             throw new UnauthorizedUserException();
         return bookingRepo.findAllUserBookingByRoomAndHotelId(hotelId, roomId)
                 .stream()
-                .map(booking -> new BookingDTO(
+                .map(booking -> new BookingResponseDTO(
                         booking.getId(),
                         booking.getRoom().getId(),
                         booking.getGuestName(),
@@ -90,17 +86,17 @@ public class BookingController {
 
     @Operation(summary = "Get details about a specific booking")
     @GetMapping("rooms/{roomId}/bookings/{bookingId}")
-    BookingDTO getBookingDetails(@PathVariable Long hotelId,
-                                 @PathVariable Long roomId,
-                                 @PathVariable Long bookingId) {
+    BookingResponseDTO getBookingDetails(@PathVariable Long hotelId,
+                                         @PathVariable Long roomId,
+                                         @PathVariable Long bookingId) {
         User currentUser = (User) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
         Booking booking = bookingRepo.findUserBookingByRoomAndHotelId(bookingId, hotelId,
-                roomId).orElseThrow(bookingNotFoundException);
+                roomId).orElseThrow(BookingNotFoundException::new);
         if (currentUser.getAuthority().equals(Authority.USER))
             if (!currentUser.getEmail().equals(booking.getUser().getEmail()))
                 throw new UnauthorizedUserException();
-        return new BookingDTO(
+        return new BookingResponseDTO(
                 booking.getId(), booking.getRoom().getId(),
                 booking.getGuestName(), booking.getContactInfo(),
                 booking.getCheckIn(), booking.getCheckOut());
@@ -110,10 +106,10 @@ public class BookingController {
     @Transactional
     @PostMapping("rooms/{roomId}/bookings")
     @ResponseStatus(HttpStatus.CREATED)
-    EntityCreatedDTO createBooking(@Valid @RequestBody BookingRequestDTO bookingDTO,
-                                   @PathVariable Long hotelId,
-                                   @PathVariable Long roomId) {
-        Room room = roomRepo.findByRoomIdAndHotelId(hotelId, roomId).orElseThrow(roomNotFoundException);
+    EntityCreatedResponseDTO createBooking(@Valid @RequestBody BookingRequestDTO bookingDTO,
+                                           @PathVariable Long hotelId,
+                                           @PathVariable Long roomId) {
+        Room room = roomRepo.findByRoomIdAndHotelId(hotelId, roomId).orElseThrow(RoomNotFoundException::new);
         boolean isRoomUnAvailable = room.getStatus() == RoomStatus.UNAVAILABLE;
         boolean isRoomAlreadyBooked = bookingRepo.isRoomAlreadyBooked(roomId, bookingDTO.checkIn(), bookingDTO.checkOut());
         if (isRoomUnAvailable)
@@ -126,25 +122,25 @@ public class BookingController {
             throw new CheckInInPastException();
         User currentUser = (User) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
-        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(hotelNotFoundException);
+        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(HotelNotFoundException::new);
         Booking booking = new Booking();
         GeneralUtils.map(bookingDTO, booking, false);
         booking.setHotel(hotel);
         booking.setUser(currentUser);
         booking.setRoom(room);
         bookingRepo.save(booking);
-        return new EntityCreatedDTO(booking.getId(), "Room Booked successfully");
+        return new EntityCreatedResponseDTO(booking.getId(), "Room Booked successfully");
     }
 
     @Operation(summary = "Update details of a booking")
     @Transactional
     @PutMapping("rooms/{roomId}/bookings/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
-    EntityCreatedDTO updateBooking(@Valid @RequestBody BookingRequestDTO bookingDTO,
-                                   @PathVariable Long bookingId,
-                                   @PathVariable Long hotelId,
-                                   @PathVariable Long roomId) {
-        Booking booking = bookingRepo.findById(bookingId).orElseThrow(bookingNotFoundException);
+    EntityCreatedResponseDTO updateBooking(@Valid @RequestBody BookingRequestDTO bookingDTO,
+                                           @PathVariable Long bookingId,
+                                           @PathVariable Long hotelId,
+                                           @PathVariable Long roomId) {
+        Booking booking = bookingRepo.findById(bookingId).orElseThrow(BookingNotFoundException::new);
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User bookingUser = booking.getUser();
         String authority = currentUser.getAuthorities()
@@ -162,17 +158,17 @@ public class BookingController {
 
         GeneralUtils.map(bookingDTO, booking, false);
         bookingRepo.save(booking);
-        return new EntityCreatedDTO(booking.getId(), "Booking updated successfully");
+        return new EntityCreatedResponseDTO(booking.getId(), "Booking updated successfully");
     }
 
     @Operation(summary = "Cancel a specific booking")
     @Transactional
     @DeleteMapping("rooms/{roomId}/bookings/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
-    public EntityCreatedDTO cancelBooking(@PathVariable Long bookingId,
-                                          @PathVariable Long roomId,
-                                          @PathVariable Long hotelId) {
-        Booking booking = bookingRepo.findById(bookingId).orElseThrow(bookingNotFoundException);
+    public EntityCreatedResponseDTO cancelBooking(@PathVariable Long bookingId,
+                                                  @PathVariable Long roomId,
+                                                  @PathVariable Long hotelId) {
+        Booking booking = bookingRepo.findById(bookingId).orElseThrow(BookingNotFoundException::new);
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User bookingUser = booking.getUser();
         String authority = currentUser.getAuthorities()
@@ -181,6 +177,6 @@ public class BookingController {
                 !currentUser.getEmail().equals(bookingUser.getEmail()))
             throw new UnauthorizedUserException();
         bookingRepo.deleteById(bookingId);
-        return new EntityCreatedDTO(booking.getId(), "Booking cancelled successfully");
+        return new EntityCreatedResponseDTO(booking.getId(), "Booking cancelled successfully");
     }
 }

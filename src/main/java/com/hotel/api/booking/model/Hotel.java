@@ -1,6 +1,7 @@
 package com.hotel.api.booking.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -31,14 +32,17 @@ public class Hotel {
     @NotNull
     private GeoLocation location;
 
+    @JsonIgnore
     @NotNull
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private Set<Room> rooms = new HashSet<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private Set<Booking> bookings = new HashSet<>();
 }

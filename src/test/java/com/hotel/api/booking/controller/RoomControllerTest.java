@@ -1,10 +1,10 @@
 package com.hotel.api.booking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hotel.api.booking.dto.EntityCreatedDTO;
-import com.hotel.api.booking.dto.HotelCreateDTO;
-import com.hotel.api.booking.dto.RoomRequestDTO;
-import com.hotel.api.booking.dto.UserDTO;
+import com.hotel.api.booking.dto.request.HotelCreateRequestDTO;
+import com.hotel.api.booking.dto.request.RoomInfoDTO;
+import com.hotel.api.booking.dto.request.UserDTO;
+import com.hotel.api.booking.dto.response.EntityCreatedResponseDTO;
 import com.hotel.api.booking.model.GeoLocation;
 import com.hotel.api.booking.model.RoomStatus;
 import com.hotel.api.booking.model.RoomType;
@@ -56,7 +56,7 @@ public class RoomControllerTest {
             GeoLocation location = new GeoLocation();
             location.setLongitude(122);
             location.setLatitude(320);
-            HotelCreateDTO hotelCreateDTO = new HotelCreateDTO(
+            HotelCreateRequestDTO hotelCreateRequestDTO = new HotelCreateRequestDTO(
                     "Test hotel",
                     300,
                     location,
@@ -65,10 +65,10 @@ public class RoomControllerTest {
 
             mockMvc.perform(post("/api/v1/hotels/")
                             .contentType("application/json")
-                            .content(mapper.writeValueAsString(hotelCreateDTO)))
+                            .content(mapper.writeValueAsString(hotelCreateRequestDTO)))
                     .andExpect(status().isCreated())
                     .andDo(result -> {
-                        EntityCreatedDTO dto = mapper.readValue(result.getResponse().getContentAsString(), EntityCreatedDTO.class);
+                        EntityCreatedResponseDTO dto = mapper.readValue(result.getResponse().getContentAsString(), EntityCreatedResponseDTO.class);
                         RoomControllerTest.hotelId = dto.id();
                         System.out.println(hotelId);
                     }).andReturn();
@@ -81,7 +81,7 @@ public class RoomControllerTest {
     @Order(2)
     @WithUserDetails(value = "admin@admin.com", userDetailsServiceBeanName = "userDetailsService")
     void adminShouldBeAbleToCreateRoomOnValidInput() throws Exception {
-        RoomRequestDTO requestDTO = new RoomRequestDTO(
+        RoomInfoDTO requestDTO = new RoomInfoDTO(
                 1,
                 RoomType.SINGLE,
                 1000,
@@ -93,7 +93,7 @@ public class RoomControllerTest {
                         .content(mapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isCreated())
                 .andDo(result -> {
-                    EntityCreatedDTO dto = mapper.readValue(result.getResponse().getContentAsString(), EntityCreatedDTO.class);
+                    EntityCreatedResponseDTO dto = mapper.readValue(result.getResponse().getContentAsString(), EntityCreatedResponseDTO.class);
                     RoomControllerTest.roomId = dto.id();
                     assertNotEquals(-1, RoomControllerTest.roomId);
                 }).andReturn();

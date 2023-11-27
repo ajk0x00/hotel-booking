@@ -1,5 +1,6 @@
 package com.hotel.api.booking.config;
 
+import com.hotel.api.booking.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
