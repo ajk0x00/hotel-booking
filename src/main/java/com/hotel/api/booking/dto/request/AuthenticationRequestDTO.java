@@ -1,4 +1,4 @@
-package com.hotel.api.booking.dto;
+package com.hotel.api.booking.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

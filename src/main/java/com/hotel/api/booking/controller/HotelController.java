@@ -1,6 +1,10 @@
 package com.hotel.api.booking.controller;
 
-import com.hotel.api.booking.dto.*;
+import com.hotel.api.booking.dto.request.HotelCreateRequestDTO;
+import com.hotel.api.booking.dto.request.HotelUpdateRequestDTO;
+import com.hotel.api.booking.dto.request.UserDTO;
+import com.hotel.api.booking.dto.response.EntityCreatedResponseDTO;
+import com.hotel.api.booking.dto.response.HotelResponseDTO;
 import com.hotel.api.booking.exception.HotelAlreadyExistException;
 import com.hotel.api.booking.exception.HotelNotFoundException;
 import com.hotel.api.booking.exception.UnauthorizedUserException;
@@ -19,12 +23,13 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 @Tag(name = "Hotels API", description = "API endpoints for managing hotels")
@@ -43,19 +48,19 @@ public class HotelController {
 
     @Operation(summary = "List all hotels in the database")
     @GetMapping("/")
-    public List<HotelDTO> listAllHotels() {
-        return hotelRepo.findAll()
-                .stream()
-                .map(hotel -> new HotelDTO(hotel.getId(), hotel.getName(),
-                        hotel.getRoomCount(), hotel.getLocation()))
-                .toList();
+    public Page<Hotel> listAllHotels(@RequestParam(required = false) Integer page,
+                                     @RequestParam(required = false) Integer size) {
+        page = (page == null) ? 0 : page;
+        size = (size == null) ? 10 : size;
+        PageRequest pageRequestData = PageRequest.of(page, size);
+        return hotelRepo.findAll(pageRequestData);
     }
 
     @Operation(summary = "Get details of a specific hotel")
     @GetMapping("/{id}")
-    public HotelDTO getHotelDetails(@PathVariable Long id) {
+    public HotelResponseDTO getHotelDetails(@PathVariable Long id) {
         Hotel hotel = hotelRepo.findById(id).orElseThrow(hotelNotFoundException);
-        return new HotelDTO(hotel.getId(), hotel.getName(), hotel.getRoomCount(), hotel.getLocation());
+        return new HotelResponseDTO(hotel.getId(), hotel.getName(), hotel.getRoomCount(), hotel.getLocation());
     }
 
     @Operation(summary = "Create new hotel")
@@ -63,7 +68,7 @@ public class HotelController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityCreatedDTO createHotel(@Valid @RequestBody HotelCreateDTO hotelCreate) {
+    public EntityCreatedResponseDTO createHotel(@Valid @RequestBody HotelCreateRequestDTO hotelCreate) {
         UserDTO userDTO = hotelCreate.user();
         try {
             User user = authService.signup(userDTO, Authority.HOTEL);
@@ -71,7 +76,7 @@ public class HotelController {
             GeneralUtils.map(hotelCreate, hotel, false);
             hotel.setUser(user);
             hotelRepo.save(hotel);
-            return new EntityCreatedDTO(hotel.getId(), "Hotel created successfully");
+            return new EntityCreatedResponseDTO(hotel.getId(), "Hotel created successfully");
         } catch (DataIntegrityViolationException exception) {
             throw new HotelAlreadyExistException();
         }
@@ -82,7 +87,7 @@ public class HotelController {
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('HOTEL')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EntityCreatedDTO updateHotel(@Valid @RequestBody HotelRequestDTO sourceHotel, @PathVariable Long id) {
+    public EntityCreatedResponseDTO updateHotel(@Valid @RequestBody HotelUpdateRequestDTO sourceHotel, @PathVariable Long id) {
         Hotel targetHotel = hotelRepo.findById(id).orElseThrow(hotelNotFoundException);
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (currentUser.getAuthority().equals(Authority.HOTEL) &&
@@ -90,7 +95,7 @@ public class HotelController {
             throw new UnauthorizedUserException();
         GeneralUtils.map(sourceHotel, targetHotel, false);
         hotelRepo.save(targetHotel);
-        return new EntityCreatedDTO(targetHotel.getId(), "Hotel updated successfully");
+        return new EntityCreatedResponseDTO(targetHotel.getId(), "Hotel updated successfully");
     }
 
     @Operation(summary = "Delete a hotel")
@@ -98,7 +103,7 @@ public class HotelController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EntityCreatedDTO deleteHotel(@PathVariable Long id) {
+    public EntityCreatedResponseDTO deleteHotel(@PathVariable Long id) {
         Hotel targetHotel = hotelRepo.findById(id).orElseThrow(hotelNotFoundException);
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (currentUser.getAuthority().equals(Authority.HOTEL) &&
@@ -107,6 +112,6 @@ public class HotelController {
         bookingRepo.deleteByHotelId(id);
         roomRepo.deleteByHotelId(id);
         hotelRepo.delete(targetHotel);
-        return new EntityCreatedDTO(targetHotel.getId(), "Hotel deleted successfully");
+        return new EntityCreatedResponseDTO(targetHotel.getId(), "Hotel deleted successfully");
     }
 }

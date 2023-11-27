@@ -1,6 +1,8 @@
-package com.hotel.api.booking.exception;
+package com.hotel.api.booking.exception.handler;
 
-import com.hotel.api.booking.dto.ErrorDTO;
+import com.hotel.api.booking.dto.response.ErrorResponseDTO;
+import com.hotel.api.booking.exception.UnauthorizedUserException;
+import com.hotel.api.booking.exception.UserAlreadyExistException;
 import com.hotel.api.booking.util.Logger;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
@@ -17,36 +19,36 @@ public class AuthenticationExceptionHandler {
 
     @ExceptionHandler(UserAlreadyExistException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorDTO handleUserAlreadyExist(UserAlreadyExistException exception) {
+    public ErrorResponseDTO handleUserAlreadyExist(UserAlreadyExistException exception) {
         logger.logException(exception);
-        return new ErrorDTO(1101, "User already exist");
+        return new ErrorResponseDTO(1101, "User already exist");
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(JwtException.class)
-    public ErrorDTO handleBadJwt(JwtException exception) {
+    public ErrorResponseDTO handleBadJwt(JwtException exception) {
         logger.logException(exception);
-        return new ErrorDTO(1102, "Invalid token");
+        return new ErrorResponseDTO(1102, "Invalid token");
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(AccessDeniedException.class)
-    public ErrorDTO handleAccessDenied(AccessDeniedException exception) {
+    public ErrorResponseDTO handleAccessDenied(AccessDeniedException exception) {
         logger.logException(exception);
-        return new ErrorDTO(1103, "User is unauthorized to access the resource");
+        return new ErrorResponseDTO(1103, "User is unauthorized to access the resource");
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorDTO incorrectCredentials(BadCredentialsException exception) {
+    public ErrorResponseDTO incorrectCredentials(BadCredentialsException exception) {
         logger.logException(exception);
-        return new ErrorDTO(1103, "Username or password is incorrect");
+        return new ErrorResponseDTO(1103, "Username or password is incorrect");
     }
 
     @ExceptionHandler(UnauthorizedUserException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorDTO unauthenticatedUserInAuthenticatedEndPoint(UnauthorizedUserException exception) {
+    public ErrorResponseDTO unauthenticatedUserInAuthenticatedEndPoint(UnauthorizedUserException exception) {
         logger.logException(exception);
-        return new ErrorDTO(1104, "User is not authorized to access this resource");
+        return new ErrorResponseDTO(1104, "User is not authorized to access this resource");
     }
 }

@@ -1,10 +1,10 @@
 package com.hotel.api.booking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hotel.api.booking.dto.EntityCreatedDTO;
-import com.hotel.api.booking.dto.HotelCreateDTO;
-import com.hotel.api.booking.dto.HotelRequestDTO;
-import com.hotel.api.booking.dto.UserDTO;
+import com.hotel.api.booking.dto.request.HotelCreateRequestDTO;
+import com.hotel.api.booking.dto.request.HotelUpdateRequestDTO;
+import com.hotel.api.booking.dto.request.UserDTO;
+import com.hotel.api.booking.dto.response.EntityCreatedResponseDTO;
 import com.hotel.api.booking.model.GeoLocation;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class HotelControllerTest {
         GeoLocation location = new GeoLocation();
         location.setLongitude(122);
         location.setLatitude(320);
-        HotelCreateDTO hotelCreateDTO = new HotelCreateDTO(
+        HotelCreateRequestDTO hotelCreateRequestDTO = new HotelCreateRequestDTO(
                 "Test hotel",
                 300,
                 location,
@@ -60,10 +60,10 @@ public class HotelControllerTest {
 
         mockMvc.perform(post("/api/v1/hotels/")
                         .contentType("application/json")
-                        .content(mapper.writeValueAsString(hotelCreateDTO)))
+                        .content(mapper.writeValueAsString(hotelCreateRequestDTO)))
                 .andExpect(status().isCreated())
                 .andDo(result -> {
-                    EntityCreatedDTO dto = mapper.readValue(result.getResponse().getContentAsString(), EntityCreatedDTO.class);
+                    EntityCreatedResponseDTO dto = mapper.readValue(result.getResponse().getContentAsString(), EntityCreatedResponseDTO.class);
                     HotelControllerTest.hotelId = dto.id();
                     System.out.println(hotelId);
                 }).andReturn();
@@ -79,7 +79,7 @@ public class HotelControllerTest {
         GeoLocation location = new GeoLocation();
         location.setLongitude(122);
         location.setLatitude(320);
-        HotelCreateDTO hotelCreateDTO = new HotelCreateDTO(
+        HotelCreateRequestDTO hotelCreateRequestDTO = new HotelCreateRequestDTO(
                 "Test hotel",
                 300,
                 location,
@@ -88,7 +88,7 @@ public class HotelControllerTest {
 
         mockMvc.perform(post("/api/v1/hotels/")
                         .contentType("application/json")
-                        .content(mapper.writeValueAsString(hotelCreateDTO)))
+                        .content(mapper.writeValueAsString(hotelCreateRequestDTO)))
                 .andExpect(status().isUnprocessableEntity());
     }
 
@@ -102,7 +102,7 @@ public class HotelControllerTest {
         GeoLocation location = new GeoLocation();
         location.setLongitude(122);
         location.setLatitude(320);
-        HotelCreateDTO hotelCreateDTO = new HotelCreateDTO(
+        HotelCreateRequestDTO hotelCreateRequestDTO = new HotelCreateRequestDTO(
                 "Test hotel",
                 300,
                 location,
@@ -111,7 +111,7 @@ public class HotelControllerTest {
 
         mockMvc.perform(post("/api/v1/hotels/")
                         .contentType("application/json")
-                        .content(mapper.writeValueAsString(hotelCreateDTO)))
+                        .content(mapper.writeValueAsString(hotelCreateRequestDTO)))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -143,7 +143,7 @@ public class HotelControllerTest {
         GeoLocation location = new GeoLocation();
         location.setLongitude(122);
         location.setLatitude(320);
-        HotelRequestDTO hotelCreateDTO = new HotelRequestDTO(
+        HotelUpdateRequestDTO hotelCreateDTO = new HotelUpdateRequestDTO(
                 "Edit Test hotel",
                 300,
                 location);
@@ -163,7 +163,7 @@ public class HotelControllerTest {
         GeoLocation location = new GeoLocation();
         location.setLongitude(122);
         location.setLatitude(320);
-        HotelRequestDTO hotelCreateDTO = new HotelRequestDTO(
+        HotelUpdateRequestDTO hotelCreateDTO = new HotelUpdateRequestDTO(
                 "Hotel Edit Test hotel",
                 300,
                 location);

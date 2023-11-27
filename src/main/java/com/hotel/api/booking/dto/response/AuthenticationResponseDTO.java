@@ -1,4 +1,4 @@
-package com.hotel.api.booking.dto;
+package com.hotel.api.booking.dto.response;
 
 public record AuthenticationResponseDTO(String token) {
 }
