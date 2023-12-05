@@ -2,7 +2,7 @@ package com.hotel.api.booking.filter;
 
 import com.hotel.api.booking.config.SecurityConfig;
 import com.hotel.api.booking.exception.UnauthorizedUserException;
-import com.hotel.api.booking.service.JwtService;
+import com.hotel.api.booking.util.JwtUtil;
 import com.hotel.api.booking.util.Logger;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -51,13 +51,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
             exceptionResolver.resolveException(request, response, null,
-                    new UnauthorizedUserException());
+                    new UnauthorizedUserException(1400));
             return;
         }
         String token = authHeader.replace("Bearer ", "");
 
         try {
-            JwtService jwtService = new JwtService(token);
+            JwtUtil jwtService = new JwtUtil(token);
             String username = jwtService.extractUsername();
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);

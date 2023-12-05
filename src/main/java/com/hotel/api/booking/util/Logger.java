@@ -1,5 +1,7 @@
 package com.hotel.api.booking.util;
 
+import com.hotel.api.booking.exception.ApplicationException;
+
 import java.util.Arrays;
 import java.util.logging.Level;
 
@@ -28,15 +30,17 @@ public class Logger {
     }
 
     public void logException(Level level, String message, Exception exception) {
-        logger.log(level,
-                "Something went wrong: Exception = " +
-                        exception.getClass().getName() +
-                        "\nStackTrace: \n\t" +
-                        Arrays.stream(exception.getStackTrace())
-                                .map(StackTraceElement::toString)
-                                .reduce(((s, s2) -> s + "\n\t" + s2)) +
-                        "\nDescription: " + message
-        );
+        String errorMessage = "Something went wrong: Exception = " +
+                exception.getClass().getName() +
+                "\nStackTrace: \n\t" +
+                Arrays.stream(exception.getStackTrace())
+                        .map(StackTraceElement::toString)
+                        .reduce(((s, s2) -> s + "\n\t" + s2)) +
+                "\nDescription: " + message;
+        if (exception instanceof ApplicationException applicationException) {
+            errorMessage += "\nLocation: " + applicationException.getCode();
+        }
+        logger.log(level, errorMessage);
     }
 
     public void log(String message) {

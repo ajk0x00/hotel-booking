@@ -1,4 +1,7 @@
 package com.hotel.api.booking.exception;
 
-public class CheckInInPastException extends RuntimeException {
+public class CheckInInPastException extends ApplicationException {
+    public CheckInInPastException(int code) {
+        super(code);
+    }
 }

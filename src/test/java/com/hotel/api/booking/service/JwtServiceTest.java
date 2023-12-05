@@ -2,6 +2,7 @@ package com.hotel.api.booking.service;
 
 import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.User;
+import com.hotel.api.booking.util.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,11 +18,11 @@ import static org.springframework.test.util.AssertionErrors.assertFalse;
 @SpringBootTest
 public class JwtServiceTest {
 
-    private JwtService jwtService;
+    private JwtUtil jwtService;
 
     @BeforeEach
     public void instantiate() {
-        jwtService = new JwtService("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJpYXQiOjE3MDA3OTk0ODAsImV4cCI6MTcwMDk3MjI4MH0.uKVRrWxaYIvndPM0V4OKPUhvg1-5QwonSB9dI_aWfuA");
+        jwtService = new JwtUtil("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJpYXQiOjE3MDA3OTk0ODAsImV4cCI6MTcwMDk3MjI4MH0.uKVRrWxaYIvndPM0V4OKPUhvg1-5QwonSB9dI_aWfuA");
     }
 
     @Test
@@ -37,8 +38,8 @@ public class JwtServiceTest {
     public void shouldGenerateCorrectToken() {
         User user = new User("test121", "test@admin.com", "test123", Authority.USER);
 
-        String token = JwtService.generateToken(user);
-        JwtService service = new JwtService(token);
+        String token = JwtUtil.generateToken(user);
+        JwtUtil service = new JwtUtil(token);
         String emailInToken = service.extractUsername();
 
         assertEquals("Email in token should be same as email in User",
@@ -47,7 +48,7 @@ public class JwtServiceTest {
 
     @Test
     public void shouldThrowExceptionWhenTokenIsMalformed() {
-        Executable executable = () -> new JwtService("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZsadG1pbkBhZG1pbi5jb20iLCJpYXQiOjE3MDA1NTE4NDgsImV4cCI6MTcwMDcyNDY0OH0.dxYp9z8fkU_KguMbT8dIelOMEBNMk1s65cG2x5rjzr0");
+        Executable executable = () -> new JwtUtil("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZsadG1pbkBhZG1pbi5jb20iLCJpYXQiOjE3MDA1NTE4NDgsImV4cCI6MTcwMDcyNDY0OH0.dxYp9z8fkU_KguMbT8dIelOMEBNMk1s65cG2x5rjzr0");
 
         assertThrows(SignatureException.class, executable);
     }
@@ -74,8 +75,7 @@ public class JwtServiceTest {
     @Test
     public void shouldThrowExceptionForExpiredToken() {
         String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJpYXQiOjE3MDA1NTE4NDgsImV4cCI6MTcwMDU1MTg0OH0.guKlzvEucHYYC66j99jN8ixSDxIPoWDzlcg--2cQYcs";
-        Executable executable = () -> new JwtService(expiredToken);
-        User user = new User("test121", "admin@admin.com", "test123", Authority.USER);
+        Executable executable = () -> new JwtUtil(expiredToken);
 
         assertThrows(ExpiredJwtException.class, executable);
     }

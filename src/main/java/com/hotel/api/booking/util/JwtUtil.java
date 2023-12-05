@@ -1,4 +1,4 @@
-package com.hotel.api.booking.service;
+package com.hotel.api.booking.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -13,13 +13,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class JwtService {
+public class JwtUtil {
 
     private static final String SECRET_KEY = "NnhYNlF1UUg1Z1BCcDFkRFBuYmVPdDA1YjFKek9DaFk=";
 
     private final Claims claims;
 
-    public JwtService(String token) {
+    public JwtUtil(String token) {
         claims = extractClaims(token);
     }
 
