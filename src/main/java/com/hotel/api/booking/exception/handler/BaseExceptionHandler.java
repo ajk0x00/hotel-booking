@@ -25,7 +25,7 @@ public class BaseExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ErrorResponseDTO handleAllUncaughtExceptions(Exception e) {
         logger.logException(e);
-        return new ErrorResponseDTO(1000, "Something went wrong :(");
+        return new ErrorResponseDTO(500, "Something went wrong :(");
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -34,28 +34,28 @@ public class BaseExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         exception.getFieldErrors().forEach(fieldError ->
                 errors.put(fieldError.getField(), fieldError.getDefaultMessage()));
-        return new ValidationErrorResponseDTO(1001, errors);
+        return new ValidationErrorResponseDTO(422, errors);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ErrorResponseDTO handleBadRequests(HttpMessageNotReadableException e) {
         logger.logException(e);
-        return new ErrorResponseDTO(1002, "Bad request format");
+        return new ErrorResponseDTO(400, "Bad request format");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ErrorResponseDTO handleBadRequests(DataIntegrityViolationException e) {
         logger.logException(e);
-        return new ErrorResponseDTO(1003, "Bad request format");
+        return new ErrorResponseDTO(400, "Bad request format");
     }
 
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ErrorResponseDTO handleBadRequests(HttpRequestMethodNotSupportedException e) {
         logger.logException(e);
-        return new ErrorResponseDTO(1004, "Bad request");
+        return new ErrorResponseDTO(405, "Bad request");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -64,7 +64,7 @@ public class BaseExceptionHandler {
         StringBuffer errors = new StringBuffer();
         exception.getConstraintViolations()
                 .forEach(violation -> errors.append(violation.getMessage()).append(","));
-        return new ErrorResponseDTO(1001, errors.toString());
+        return new ErrorResponseDTO(401, errors.toString());
     }
 
 }

@@ -27,6 +27,7 @@ public class GeneralUtils {
         try {
             field.setAccessible(true);
             Object value = field.get(source);
+            if (value == null) return;
             Field targetField = target.getClass().getDeclaredField(field.getName());
             targetField.setAccessible(true);
             targetField.set(target, value);

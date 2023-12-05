@@ -1,6 +1,7 @@
 package com.hotel.api.booking.config;
 
 import com.hotel.api.booking.filter.JwtAuthenticationFilter;
+import com.hotel.api.booking.filter.RoleAuthorizationFilter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,6 +30,7 @@ public class SecurityConfig {
 
     private final AuthenticationProvider authProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RoleAuthorizationFilter roleAuthorizationFilter;
     private final HandlerExceptionResolver exceptionResolver;
 
     public static List<Pattern> publicEndPoints = List.of(
@@ -40,10 +43,12 @@ public class SecurityConfig {
 
     public SecurityConfig(AuthenticationProvider authProvider,
                           JwtAuthenticationFilter jwtAuthenticationFilter,
+                          RoleAuthorizationFilter roleAuthorizationFilter,
                           @Qualifier("handlerExceptionResolver")
                           HandlerExceptionResolver exceptionResolver) {
         this.authProvider = authProvider;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.roleAuthorizationFilter = roleAuthorizationFilter;
         this.exceptionResolver = exceptionResolver;
     }
 
@@ -60,6 +65,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .authenticationProvider(authProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(roleAuthorizationFilter, AuthorizationFilter.class)
                 .exceptionHandling(
                         handle -> handle.accessDeniedHandler((req, res, exp) ->
                                 exceptionResolver.resolveException(req, res, null, exp)))

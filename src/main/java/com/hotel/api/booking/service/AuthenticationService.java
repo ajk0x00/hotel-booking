@@ -1,14 +1,13 @@
 package com.hotel.api.booking.service;
 
 import com.hotel.api.booking.dto.request.AuthenticationRequestDTO;
-import com.hotel.api.booking.dto.request.UserDTO;
-import com.hotel.api.booking.exception.UserNotFoundException;
 import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.User;
 import com.hotel.api.booking.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,15 +21,11 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public User signup(UserDTO requestDTO, Authority authority) {
-        String name = requestDTO.name();
-        String email = requestDTO.email().toLowerCase();
-        String password = passwordEncoder.encode(requestDTO.password());
-
+    public User signup(String name, String email, String password, Authority authority) {
         User user = new User(
                 name,
                 email,
-                password,
+                passwordEncoder.encode(password),
                 authority
         );
         userRepo.save(user);
@@ -43,6 +38,6 @@ public class AuthenticationService {
         String password = requestDTO.password();
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        return userRepo.findByEmail(username).orElseThrow(UserNotFoundException::new);
+        return userRepo.findByEmail(username).orElseThrow(() -> new BadCredentialsException("Username or password is invalid"));
     }
 }

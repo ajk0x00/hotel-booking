@@ -1,5 +1,6 @@
 package com.hotel.api.booking.config;
 
+import com.hotel.api.booking.exception.UserNotFoundException;
 import com.hotel.api.booking.model.Authority;
 import com.hotel.api.booking.model.User;
 import com.hotel.api.booking.repository.UserRepository;
@@ -8,26 +9,21 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.function.Supplier;
-
 @RequiredArgsConstructor
 @Configuration
 public class ApplicationConfig {
 
     private final UserRepository userRepo;
-    private final Supplier<BadCredentialsException> badCredentialsException =
-            () -> new BadCredentialsException("Username or password is incorrect");
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepo.findByEmail(username).orElseThrow(badCredentialsException);
+        return username -> userRepo.findByEmail(username).orElseThrow(() -> new UserNotFoundException(1445));
     }
 
     @Bean
