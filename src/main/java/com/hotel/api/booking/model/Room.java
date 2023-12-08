@@ -1,6 +1,7 @@
 package com.hotel.api.booking.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class Room {
     private Long id;
 
     @NotNull
+    @Min(value = 0, message = "room number can not be -ve value")
     private int roomNumber;
 
     @NotNull
@@ -29,6 +31,7 @@ public class Room {
     private RoomType type;
 
     @NotNull
+    @Min(value = 0, message = "Invalid price")
     private double price;
 
     @NotNull

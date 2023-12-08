@@ -27,6 +27,7 @@ public class User implements UserDetails {
 
     @NotBlank
     @NotNull
+    @Size(min = 3, max = 25, message = "Name should have a character length between 3 and 25")
     private String name;
 
     @NotBlank
